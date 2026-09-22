@@ -1498,7 +1498,7 @@ function init() {
   } catch(e) {}
 
   setDayNightMode(initialNight, false);
-  switchDay(initialDay);
+  switchDay(initialDay, true);
   startCountdown();
   buildQueue();
   wireButtons();
@@ -1523,7 +1523,7 @@ function buildDayPills() {
 /* ═══════════════════════════════════════════════════════
    SWITCH DAY
 ═══════════════════════════════════════════════════════ */
-function switchDay(day) {
+function switchDay(day, isInitial = false) {
   currentDay = day;
   try {
     localStorage.setItem("durga_pujo_saved_day", day);
@@ -1544,7 +1544,7 @@ function switchDay(day) {
   // countdown for this specific day
   updateCountdown(day);
   // background
-  updateBackground();
+  updateBackground(isInitial);
   // facts
   clearInterval(factTimer);
   factIdx = 0;
@@ -1824,22 +1824,22 @@ function stopSlideshow() {
   currentSlideshowKey = null;
 }
 
-function updateBackground() {
+function updateBackground(isInitial = false) {
   const targetKey = `${currentDay}-${isNight ? "night" : "day"}`;
   const photos = getActivePhotoList();
 
   if (photos.length > 1) {
     if (currentSlideshowKey !== targetKey || !slideshowTimer) {
-      startPhotoSlideshow(targetKey, photos, false);
+      startPhotoSlideshow(targetKey, photos, isInitial);
     }
   } else if (photos.length === 1) {
     stopSlideshow();
     currentSlideshowKey = targetKey;
     const p = photos[0];
-    setPhotoCrossfade(p.url, p.credit, false, p.pos || "center center", p.fit || "contain", p.glow || null, p.glowColor || null);
+    setPhotoCrossfade(p.url, p.credit, isInitial, p.pos || "center center", p.fit || "contain", p.glow || null, p.glowColor || null);
   } else {
     stopSlideshow();
-    setPhotoCrossfade(null, null, false);
+    setPhotoCrossfade(null, null, isInitial);
   }
 }
 

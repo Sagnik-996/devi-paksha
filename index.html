@@ -2482,6 +2482,59 @@ function initYouTube() {
 }
 
 let isAdDetected = false;
+let adMuteGuard = false;
+
+function getExpectedTrackDuration() {
+  const trk = currentList[currentIndex];
+  if (!trk || !trk.dur) return 180;
+  const parts = trk.dur.split(':');
+  if (parts.length === 2) {
+    return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+  }
+  return 180;
+}
+
+// Global listener intercepting YouTube IFrame internal postMessage events
+window.addEventListener("message", (event) => {
+  if (!event.origin || (!event.origin.includes("youtube") && !event.origin.includes("youtube-nocookie"))) return;
+  let data;
+  try {
+    data = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
+  } catch(e) { return; }
+  if (!data) return;
+
+  const info = data.info || (data.event === "infoDelivery" ? data : null);
+  if (info) {
+    const isAd = Boolean(
+      info.isAd === true ||
+      (typeof info.adState !== "undefined" && info.adState > 0) ||
+      info.adFormat ||
+      info.adVideoId ||
+      (info.duration && info.duration > 0 && info.duration <= 35 && getExpectedTrackDuration() > 60)
+    );
+
+    if (isAd) {
+      isAdDetected = true;
+      try { if (ytPlayer && ytPlayer.mute) ytPlayer.mute(); } catch(e) {}
+      updateAdUI(true);
+    } else if (info.playerState === 1 && !isAd) {
+      if (isAdDetected || adMuteGuard) {
+        const curDur = (info.duration || (ytPlayer && ytPlayer.getDuration ? ytPlayer.getDuration() : 0));
+        if (curDur > 35 || getExpectedTrackDuration() <= 35) {
+          isAdDetected = false;
+          adMuteGuard = false;
+          try {
+            if (ytPlayer && ytPlayer.unMute) {
+              ytPlayer.unMute();
+              ytPlayer.setVolume(100);
+            }
+          } catch(e) {}
+          updateAdUI(false);
+        }
+      }
+    }
+  }
+});
 
 function checkAdAndHandle() {
   if (!ytReady || !ytPlayer) return;
@@ -2489,44 +2542,25 @@ function checkAdAndHandle() {
     let adPlaying = false;
     const state = ytPlayer.getPlayerState ? ytPlayer.getPlayerState() : -1;
     
-    // Check when player is active (1 = PLAYING, 3 = BUFFERING)
     if (state === 1 || state === 3) {
-      if (ytPlayer.getVideoData) {
-        const data = ytPlayer.getVideoData();
-        if (data && data.video_id && playingId && data.video_id !== playingId) {
-          adPlaying = true;
-        }
-      }
-      if (!adPlaying && ytPlayer.getDuration) {
-        const dur = ytPlayer.getDuration();
-        const trk = currentList[currentIndex];
-        if (dur > 0 && dur <= 35 && trk && trk.dur) {
-          const parts = trk.dur.split(':');
-          if (parts.length === 2) {
-            const expSec = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
-            if (expSec > 75) {
-              adPlaying = true;
-            }
-          }
-        }
+      const dur = ytPlayer.getDuration ? ytPlayer.getDuration() : 0;
+      const expDur = getExpectedTrackDuration();
+      if (dur > 0 && dur <= 35 && expDur > 60) {
+        adPlaying = true;
       }
     }
 
-    if (adPlaying) {
-      if (!isAdDetected) {
-        isAdDetected = true;
-        try { ytPlayer.mute(); } catch(e) {}
-        updateAdUI(true);
-      }
-    } else {
-      if (isAdDetected) {
-        isAdDetected = false;
-        try {
-          ytPlayer.unMute();
-          ytPlayer.setVolume(100);
-        } catch(e) {}
-        updateAdUI(false);
-      }
+    if (adPlaying || isAdDetected) {
+      isAdDetected = true;
+      try { ytPlayer.mute(); } catch(e) {}
+      updateAdUI(true);
+    } else if (state === 1 && !adPlaying && !adMuteGuard) {
+      isAdDetected = false;
+      try {
+        ytPlayer.unMute();
+        ytPlayer.setVolume(100);
+      } catch(e) {}
+      updateAdUI(false);
     }
   } catch(e) {}
 }
@@ -2545,7 +2579,7 @@ function updateAdUI(active) {
       }
     }
     badge.innerHTML = `
-      <span>📢 YouTube Ad (Audio Muted) • Song will start shortly</span>
+      <span>📢 YouTube Ad (Audio Muted) • Song starting shortly</span>
       <button type="button" class="dp-ad-skip-btn" onclick="nextTrack()">Skip Track ⏭</button>
     `;
     badge.style.display = "flex";
@@ -2591,10 +2625,6 @@ window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
 
 function onPlayerReady() {
   ytReady = true;
-  try {
-    if (ytPlayer.unMute) ytPlayer.unMute();
-    if (ytPlayer.setVolume) ytPlayer.setVolume(100);
-  } catch(e) {}
   if (pendingId) {
     if (pendingAutoplay) {
       try {
@@ -2631,13 +2661,30 @@ function loadYT(id, autoplay) {
     return;
   }
   try {
-    if (ytPlayer.unMute) ytPlayer.unMute();
-    if (ytPlayer.setVolume) ytPlayer.setVolume(100);
     if (autoplay) {
+      // Mute immediately to guarantee NO ad audio leaks through
+      adMuteGuard = true;
+      try { ytPlayer.mute(); } catch(e) {}
+
       ytPlayer.loadVideoById({
         videoId: id,
         suggestedQuality: 'small'
       });
+
+      // After 1.5s, if no ad flags and player is playing full track, unmute
+      setTimeout(() => {
+        if (!isAdDetected && ytPlayer && ytPlayer.getPlayerState && ytPlayer.getPlayerState() === 1) {
+          const curDur = ytPlayer.getDuration ? ytPlayer.getDuration() : 0;
+          if (curDur > 35 || getExpectedTrackDuration() <= 35) {
+            adMuteGuard = false;
+            try {
+              ytPlayer.unMute();
+              ytPlayer.setVolume(100);
+            } catch(e) {}
+            updateAdUI(false);
+          }
+        }
+      }, 1500);
     } else {
       ytPlayer.cueVideoById({
         videoId: id,

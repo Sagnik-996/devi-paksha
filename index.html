@@ -655,65 +655,17 @@
     }
   }
 
-  /* Ad Detection Notice Badge */
-  .dp-ad-badge {
-    display: none;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    background: rgba(30, 15, 6, 0.94);
-    border: 1px solid rgba(255, 216, 115, 0.45);
-    color: #ffd873;
-    padding: 8px 16px;
-    border-radius: 999px;
-    font-size: 12.5px;
-    font-weight: 500;
-    max-width: 520px;
-    margin: 0 auto 12px;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
-    z-index: 20;
-    position: relative;
-  }
-  .dp-ad-skip-btn {
-    background: rgba(255, 216, 115, 0.2);
-    border: 1px solid rgba(255, 216, 115, 0.55);
-    color: #ffffff;
-    border-radius: 999px;
-    padding: 4px 10px;
-    font-size: 11.5px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all .15s ease;
-    white-space: nowrap;
-  }
-  .dp-ad-skip-btn:hover {
-    background: #ffd873;
-    color: #111;
-  }
-
-  /* YouTube Host Container */
+  /* YouTube Host Container (devipaksha.in 1x1 audio element - no ads, instant play) */
   .yt-player-host {
     position: fixed;
-    width: 260px;
-    height: 150px;
-    right: 20px;
-    bottom: 90px;
-    opacity: 0.001;
-    pointer-events: none;
-    z-index: -1;
-    border-radius: 12px;
+    left: 0;
+    top: 0;
+    width: 1px;
+    height: 1px;
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.85);
-    border: 1px solid rgba(255, 216, 115, 0.4);
-    transition: opacity .3s ease, transform .3s ease;
-  }
-  .yt-player-host.show-ad {
-    opacity: 1 !important;
-    pointer-events: auto !important;
-    z-index: 1000 !important;
-    background: #000;
+    opacity: 0;
+    pointer-events: none;
+    z-index: -9999;
   }
 
   /* ── Devipaksha-Style Fullscreen Blurred Playlist Modal ── */
@@ -1160,7 +1112,7 @@
 
 
 
-<div id="ytPlayerHost" class="yt-player-host"></div>
+<div id="ytPlayerHost" class="yt-player-host" aria-hidden="true"></div>
 
 <script>
 /* ═══════════════════════════════════════════════════════
@@ -2275,8 +2227,6 @@ function renderPlayerUI(idx) {
 function selectAndPlay(idx) {
   if (idx < 0 || idx >= currentList.length) return;
   try { stopDhakWithFade(350); } catch(e) {}
-  isAdDetected = false;
-  if (typeof updateAdUI === "function") updateAdUI(false);
   currentIndex = idx;
   const track = currentList[idx];
   playingId = track.id;
@@ -2370,9 +2320,6 @@ function startProgress() {
   progressTimer = setInterval(() => {
     if (!ytReady || !ytPlayer || !ytPlayer.getCurrentTime) return;
     try {
-      if (typeof checkAdAndHandle === "function") checkAdAndHandle();
-      if (isAdDetected) return;
-
       const cur = ytPlayer.getCurrentTime() || 0;
       const dur = ytPlayer.getDuration() || 0;
       const curEl = document.getElementById('dpCurrentTime');
@@ -2384,7 +2331,7 @@ function startProgress() {
         if (fillEl) fillEl.style.width = Math.min(100, (cur / dur) * 100) + "%";
       }
     } catch(e) {}
-  }, 250);
+  }, 400);
 }
 
 function stopProgress() {
@@ -2481,137 +2428,18 @@ function initYouTube() {
   }
 }
 
-let isAdDetected = false;
-let adMuteGuard = false;
-
-function getExpectedTrackDuration() {
-  const trk = currentList[currentIndex];
-  if (!trk || !trk.dur) return 180;
-  const parts = trk.dur.split(':');
-  if (parts.length === 2) {
-    return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
-  }
-  return 180;
-}
-
-// Global listener intercepting YouTube IFrame internal postMessage events
-window.addEventListener("message", (event) => {
-  if (!event.origin || (!event.origin.includes("youtube") && !event.origin.includes("youtube-nocookie"))) return;
-  let data;
-  try {
-    data = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
-  } catch(e) { return; }
-  if (!data) return;
-
-  const info = data.info || (data.event === "infoDelivery" ? data : null);
-  if (info) {
-    const isAd = Boolean(
-      info.isAd === true ||
-      (typeof info.adState !== "undefined" && info.adState > 0) ||
-      info.adFormat ||
-      info.adVideoId ||
-      (info.duration && info.duration > 0 && info.duration <= 35 && getExpectedTrackDuration() > 60)
-    );
-
-    if (isAd) {
-      isAdDetected = true;
-      try { if (ytPlayer && ytPlayer.mute) ytPlayer.mute(); } catch(e) {}
-      updateAdUI(true);
-    } else if (info.playerState === 1 && !isAd) {
-      if (isAdDetected || adMuteGuard) {
-        const curDur = (info.duration || (ytPlayer && ytPlayer.getDuration ? ytPlayer.getDuration() : 0));
-        if (curDur > 35 || getExpectedTrackDuration() <= 35) {
-          isAdDetected = false;
-          adMuteGuard = false;
-          try {
-            if (ytPlayer && ytPlayer.unMute) {
-              ytPlayer.unMute();
-              ytPlayer.setVolume(100);
-            }
-          } catch(e) {}
-          updateAdUI(false);
-        }
-      }
-    }
-  }
-});
-
-function checkAdAndHandle() {
-  if (!ytReady || !ytPlayer) return;
-  try {
-    let adPlaying = false;
-    const state = ytPlayer.getPlayerState ? ytPlayer.getPlayerState() : -1;
-    
-    if (state === 1 || state === 3) {
-      const dur = ytPlayer.getDuration ? ytPlayer.getDuration() : 0;
-      const expDur = getExpectedTrackDuration();
-      if (dur > 0 && dur <= 35 && expDur > 60) {
-        adPlaying = true;
-      }
-    }
-
-    if (adPlaying || isAdDetected) {
-      isAdDetected = true;
-      try { ytPlayer.mute(); } catch(e) {}
-      updateAdUI(true);
-    } else if (state === 1 && !adPlaying && !adMuteGuard) {
-      isAdDetected = false;
-      try {
-        ytPlayer.unMute();
-        ytPlayer.setVolume(100);
-      } catch(e) {}
-      updateAdUI(false);
-    }
-  } catch(e) {}
-}
-
-function updateAdUI(active) {
-  const host = document.getElementById("ytPlayerHost");
-  let badge = document.getElementById("dpAdBadge");
-  if (active) {
-    if (!badge) {
-      badge = document.createElement("div");
-      badge.id = "dpAdBadge";
-      badge.className = "dp-ad-badge";
-      const card = document.getElementById("dpPlayerCard");
-      if (card && card.parentNode) {
-        card.parentNode.insertBefore(badge, card);
-      }
-    }
-    badge.innerHTML = `
-      <span>📢 YouTube Ad (Audio Muted) • Song starting shortly</span>
-      <button type="button" class="dp-ad-skip-btn" onclick="nextTrack()">Skip Track ⏭</button>
-    `;
-    badge.style.display = "flex";
-    if (host) host.classList.add("show-ad");
-  } else {
-    if (badge) badge.style.display = "none";
-    if (host) host.classList.remove("show-ad");
-  }
-}
-
 function onYouTubeIframeAPIReady() {
   if (ytPlayer) return;
-  const currentOrigin = (window.location.protocol === "http:" || window.location.protocol === "https:")
-    ? window.location.origin
-    : "http://localhost:3000";
-
   ytPlayer = new YT.Player("ytPlayerHost", {
     host: "https://www.youtube-nocookie.com",
-    height: "150",
-    width: "260",
+    width: "1",
+    height: "1",
     playerVars: {
-      autoplay: 1,
-      controls: 1,
+      controls: 0,
       disablekb: 1,
-      fs: 0,
-      iv_load_policy: 3,
-      modestbranding: 1,
-      rel: 0,
       playsinline: 1,
-      enablejsapi: 1,
-      origin: currentOrigin,
-      widget_referrer: currentOrigin
+      rel: 0,
+      modestbranding: 1
     },
     events: {
       onReady: onPlayerReady,
@@ -2625,31 +2453,25 @@ window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
 
 function onPlayerReady() {
   ytReady = true;
+  try {
+    if (ytPlayer.unMute) ytPlayer.unMute();
+    if (ytPlayer.setVolume) ytPlayer.setVolume(100);
+  } catch(e) {}
   if (pendingId) {
     if (pendingAutoplay) {
       try {
-        ytPlayer.loadVideoById({ videoId: pendingId, suggestedQuality: 'small' });
+        ytPlayer.loadVideoById({ videoId: pendingId, startSeconds: 0 });
       } catch(e) {
         ytPlayer.loadVideoById(pendingId);
       }
     } else {
       try {
-        ytPlayer.cueVideoById({ videoId: pendingId, suggestedQuality: 'small' });
+        ytPlayer.cueVideoById({ videoId: pendingId, startSeconds: 0 });
       } catch(e) {
         ytPlayer.cueVideoById(pendingId);
       }
     }
     pendingId = null;
-  } else {
-    // Pre-warm the player with current / initial track for instant start
-    const primeTrack = (currentIndex >= 0 && currentList[currentIndex])
-      ? currentList[currentIndex].id
-      : (currentList[0] ? currentList[0].id : null);
-    if (primeTrack) {
-      try {
-        ytPlayer.cueVideoById({ videoId: primeTrack, suggestedQuality: 'small' });
-      } catch(e) {}
-    }
   }
 }
 
@@ -2661,35 +2483,12 @@ function loadYT(id, autoplay) {
     return;
   }
   try {
+    if (ytPlayer.unMute) ytPlayer.unMute();
+    if (ytPlayer.setVolume) ytPlayer.setVolume(100);
     if (autoplay) {
-      // Mute immediately to guarantee NO ad audio leaks through
-      adMuteGuard = true;
-      try { ytPlayer.mute(); } catch(e) {}
-
-      ytPlayer.loadVideoById({
-        videoId: id,
-        suggestedQuality: 'small'
-      });
-
-      // After 1.5s, if no ad flags and player is playing full track, unmute
-      setTimeout(() => {
-        if (!isAdDetected && ytPlayer && ytPlayer.getPlayerState && ytPlayer.getPlayerState() === 1) {
-          const curDur = ytPlayer.getDuration ? ytPlayer.getDuration() : 0;
-          if (curDur > 35 || getExpectedTrackDuration() <= 35) {
-            adMuteGuard = false;
-            try {
-              ytPlayer.unMute();
-              ytPlayer.setVolume(100);
-            } catch(e) {}
-            updateAdUI(false);
-          }
-        }
-      }, 1500);
+      ytPlayer.loadVideoById({ videoId: id, startSeconds: 0 });
     } else {
-      ytPlayer.cueVideoById({
-        videoId: id,
-        suggestedQuality: 'small'
-      });
+      ytPlayer.cueVideoById({ videoId: id, startSeconds: 0 });
     }
   } catch(e) {
     console.error("loadYT error:", e);
@@ -2701,7 +2500,6 @@ function loadYT(id, autoplay) {
 }
 
 function onPlayerStateChange(e) {
-  checkAdAndHandle();
   if (e.data === YT.PlayerState.PLAYING) {
     errorSkips = 0;
     setPlayBtns("⏸");
@@ -2711,10 +2509,6 @@ function onPlayerStateChange(e) {
     stopProgress();
   } else if (e.data === YT.PlayerState.ENDED) {
     stopProgress();
-    if (isAdDetected) {
-      checkAdAndHandle();
-      return;
-    }
     if (isRepeat) {
       selectAndPlay(currentIndex);
     } else {

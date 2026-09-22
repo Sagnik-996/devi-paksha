@@ -655,6 +655,67 @@
     }
   }
 
+  /* Ad Detection Notice Badge */
+  .dp-ad-badge {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: rgba(30, 15, 6, 0.94);
+    border: 1px solid rgba(255, 216, 115, 0.45);
+    color: #ffd873;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 500;
+    max-width: 520px;
+    margin: 0 auto 12px;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
+    z-index: 20;
+    position: relative;
+  }
+  .dp-ad-skip-btn {
+    background: rgba(255, 216, 115, 0.2);
+    border: 1px solid rgba(255, 216, 115, 0.55);
+    color: #ffffff;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s ease;
+    white-space: nowrap;
+  }
+  .dp-ad-skip-btn:hover {
+    background: #ffd873;
+    color: #111;
+  }
+
+  /* YouTube Host Container */
+  .yt-player-host {
+    position: fixed;
+    width: 260px;
+    height: 150px;
+    right: 20px;
+    bottom: 90px;
+    opacity: 0.001;
+    pointer-events: none;
+    z-index: -1;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.85);
+    border: 1px solid rgba(255, 216, 115, 0.4);
+    transition: opacity .3s ease, transform .3s ease;
+  }
+  .yt-player-host.show-ad {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    z-index: 1000 !important;
+    background: #000;
+  }
+
   /* ── Devipaksha-Style Fullscreen Blurred Playlist Modal ── */
   .dp-playlist-modal-backdrop {
     position: fixed;
@@ -1099,7 +1160,7 @@
 
 
 
-<div id="ytPlayerHost" style="position:fixed; width:200px; height:200px; right:0; bottom:0; opacity:0.001; pointer-events:none; z-index:-1;"></div>
+<div id="ytPlayerHost" class="yt-player-host"></div>
 
 <script>
 /* ═══════════════════════════════════════════════════════
@@ -1254,7 +1315,7 @@ const PUJA_RADIO_TRACKS = [
   {id:"hDve9YmTZq4",title:"Esho Maa Durga",artist:"Shamik Guha Roy",dur:"3:57"},
   {id:"8z-SSVEj9o8",title:"Maa Go Tui",artist:"Somchanda Bhattacharya",dur:"2:00"},
   {id:"sto9TBxGibE",title:"Jago Uma",artist:"Rupankar",dur:"5:18"},
-  {id:"mXqUIFUYqpM",title:"Aigiri Nandini (feat. Samarthan, Ramprakash) (Rock Version)",artist:"Sowrabha",dur:"4:57"},
+  {id:"2U416kTo0as",title:"Elo Je Maa",artist:"Abhijeet, Shreya Ghoshal",dur:"4:25"},
   {id:"p_hqO0sJh-I",title:"Ailo Uma Barite",artist:"ANTARA NANDY",dur:"3:53"},
   {id:"UpeueoYgHnE",title:"Aaj Baaje",artist:"Somchanda Bhattacharya",dur:"3:34"},
   {id:"-vPbyevbN4k",title:"Yoddhar Saathe Ebar Pujo Katan",artist:"Nakash Aziz Official",dur:"3:47"},
@@ -1333,7 +1394,7 @@ const PUJA_RADIO_TRACKS = [
   {id:"8NeUGOEpGh0",title:"Maa Go Tui",artist:"Shovan Ganguly Official",dur:"2:00"},
   {id:"a0ZwJJSlxC8",title:"Khoka Babu",artist:"Rishi",dur:"4:17"},
   {id:"Bx2avxFHwM0",title:"Pyaar Ka Bukhaar",artist:"Jeet Gannguli",dur:"3:34"},
-  {id:"KqpIIaCJggY",title:"Ankhiyon Ke Jharokhon Se - Classic Romantic Song - Sachin & Ranjeeta - Old Hindi Songs",artist:"Rajshri",dur:"6:45"},
+  {id:"kYx-94sFfyk",title:"Mahalaya - Mahishasura Mardini",artist:"Birendra Krishna Bhadra",dur:"1:28:15"},
   {id:"bhG8rZJlsDc",title:"Ashtami Te Tomar Paray",artist:"Chirkut Official",dur:"3:53"}
 ];
 
@@ -2214,6 +2275,8 @@ function renderPlayerUI(idx) {
 function selectAndPlay(idx) {
   if (idx < 0 || idx >= currentList.length) return;
   try { stopDhakWithFade(350); } catch(e) {}
+  isAdDetected = false;
+  if (typeof updateAdUI === "function") updateAdUI(false);
   currentIndex = idx;
   const track = currentList[idx];
   playingId = track.id;
@@ -2307,6 +2370,9 @@ function startProgress() {
   progressTimer = setInterval(() => {
     if (!ytReady || !ytPlayer || !ytPlayer.getCurrentTime) return;
     try {
+      if (typeof checkAdAndHandle === "function") checkAdAndHandle();
+      if (isAdDetected) return;
+
       const cur = ytPlayer.getCurrentTime() || 0;
       const dur = ytPlayer.getDuration() || 0;
       const curEl = document.getElementById('dpCurrentTime');
@@ -2415,6 +2481,81 @@ function initYouTube() {
   }
 }
 
+let isAdDetected = false;
+
+function checkAdAndHandle() {
+  if (!ytReady || !ytPlayer) return;
+  try {
+    let adPlaying = false;
+    const state = ytPlayer.getPlayerState ? ytPlayer.getPlayerState() : -1;
+    
+    // Check when player is active (1 = PLAYING, 3 = BUFFERING)
+    if (state === 1 || state === 3) {
+      if (ytPlayer.getVideoData) {
+        const data = ytPlayer.getVideoData();
+        if (data && data.video_id && playingId && data.video_id !== playingId) {
+          adPlaying = true;
+        }
+      }
+      if (!adPlaying && ytPlayer.getDuration) {
+        const dur = ytPlayer.getDuration();
+        const trk = currentList[currentIndex];
+        if (dur > 0 && dur <= 35 && trk && trk.dur) {
+          const parts = trk.dur.split(':');
+          if (parts.length === 2) {
+            const expSec = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+            if (expSec > 75) {
+              adPlaying = true;
+            }
+          }
+        }
+      }
+    }
+
+    if (adPlaying) {
+      if (!isAdDetected) {
+        isAdDetected = true;
+        try { ytPlayer.mute(); } catch(e) {}
+        updateAdUI(true);
+      }
+    } else {
+      if (isAdDetected) {
+        isAdDetected = false;
+        try {
+          ytPlayer.unMute();
+          ytPlayer.setVolume(100);
+        } catch(e) {}
+        updateAdUI(false);
+      }
+    }
+  } catch(e) {}
+}
+
+function updateAdUI(active) {
+  const host = document.getElementById("ytPlayerHost");
+  let badge = document.getElementById("dpAdBadge");
+  if (active) {
+    if (!badge) {
+      badge = document.createElement("div");
+      badge.id = "dpAdBadge";
+      badge.className = "dp-ad-badge";
+      const card = document.getElementById("dpPlayerCard");
+      if (card && card.parentNode) {
+        card.parentNode.insertBefore(badge, card);
+      }
+    }
+    badge.innerHTML = `
+      <span>📢 YouTube Ad (Audio Muted) • Song will start shortly</span>
+      <button type="button" class="dp-ad-skip-btn" onclick="nextTrack()">Skip Track ⏭</button>
+    `;
+    badge.style.display = "flex";
+    if (host) host.classList.add("show-ad");
+  } else {
+    if (badge) badge.style.display = "none";
+    if (host) host.classList.remove("show-ad");
+  }
+}
+
 function onYouTubeIframeAPIReady() {
   if (ytPlayer) return;
   const currentOrigin = (window.location.protocol === "http:" || window.location.protocol === "https:")
@@ -2422,11 +2563,12 @@ function onYouTubeIframeAPIReady() {
     : "http://localhost:3000";
 
   ytPlayer = new YT.Player("ytPlayerHost", {
-    height: "200",
-    width: "200",
+    host: "https://www.youtube-nocookie.com",
+    height: "150",
+    width: "260",
     playerVars: {
       autoplay: 1,
-      controls: 0,
+      controls: 1,
       disablekb: 1,
       fs: 0,
       iv_load_policy: 3,
@@ -2434,7 +2576,8 @@ function onYouTubeIframeAPIReady() {
       rel: 0,
       playsinline: 1,
       enablejsapi: 1,
-      origin: currentOrigin
+      origin: currentOrigin,
+      widget_referrer: currentOrigin
     },
     events: {
       onReady: onPlayerReady,
@@ -2511,6 +2654,7 @@ function loadYT(id, autoplay) {
 }
 
 function onPlayerStateChange(e) {
+  checkAdAndHandle();
   if (e.data === YT.PlayerState.PLAYING) {
     errorSkips = 0;
     setPlayBtns("⏸");
@@ -2520,6 +2664,10 @@ function onPlayerStateChange(e) {
     stopProgress();
   } else if (e.data === YT.PlayerState.ENDED) {
     stopProgress();
+    if (isAdDetected) {
+      checkAdAndHandle();
+      return;
+    }
     if (isRepeat) {
       selectAndPlay(currentIndex);
     } else {

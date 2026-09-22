@@ -1240,11 +1240,11 @@ const DAYS_ORDER = ["mahalaya","shashti","saptami","ashtami","nabami","dashami"]
 const TIER = { "1":"🥇","2":"🥈","3":"🥉" };
 
 const PUJA_RADIO_TRACKS = [
-  {id:"SFJeglBF5cg",title:"Dugga Elo",artist:"Monali Thakur",dur:"2:27"},
-  {id:"HeF8UhOYnq0",title:"Dugga Ma",artist:"Arijit Singh",dur:"4:31"},
-  {id:"S8WKJt7bWGg",title:"Ebar Jeno Onno Rokom Pujo",artist:"Nakash Aziz Official",dur:"3:33"},
-  {id:"7uzjfZ423Kc",title:"Dhak Baja Kashor Baja",artist:"Shreya Ghoshal Official",dur:"4:26"},
-  {id:"cAD7KutMTJw",title:"Bolo Dugga Elo",artist:"Kaushik-Guddu",dur:"3:20"},
+  {id:"SFJeglBF5cg",title:"Dugga Elo",artist:"Monali Thakur",dur:"2:27",src:"audio/dugga_elo.mp3"},
+  {id:"HeF8UhOYnq0",title:"Dugga Ma",artist:"Arijit Singh",dur:"4:31",src:"audio/dugga_ma.mp3"},
+  {id:"S8WKJt7bWGg",title:"Ebar Jeno Onno Rokom Pujo",artist:"Nakash Aziz Official",dur:"3:33",src:"audio/ebar_jeno.mp3"},
+  {id:"7uzjfZ423Kc",title:"Dhak Baja Kashor Baja",artist:"Shreya Ghoshal Official",dur:"4:26",src:"audio/dhak_baja.mp3"},
+  {id:"cAD7KutMTJw",title:"Bolo Dugga Elo",artist:"Kaushik-Guddu",dur:"3:20",src:"audio/bolo_dugga_elo.mp3"},
   {id:"w6SQsKD2U-Y",title:"Aamaar Dugga",artist:"Monali Thakur",dur:"3:20"},
   {id:"PqdxxIAgjgk",title:"Dhaker Taley",artist:"Release",dur:"4:43"},
   {id:"G65AupY9ge0",title:"Dugga Elo",artist:"Akriti Kakar",dur:"3:58"},
@@ -1485,6 +1485,7 @@ let playingId = null;
 let npExpanded = false;
 
 let ytPlayer = null, ytReady = false;
+let nativeAudio = null;
 let pendingId = null, pendingAutoplay = false;
 let progressTimer = null, lastDur = 0;
 let errorSkips = 0;
@@ -1497,6 +1498,7 @@ let factIdx = 0, factTimer = null;
 function init() {
   checkFileProtocol();
   initYouTube();
+  initNativeAudio();
   initDhak();
   buildDayPills();
 
@@ -2219,8 +2221,67 @@ function renderPlayerUI(idx) {
   });
 }
 
+function initNativeAudio() {
+  if (nativeAudio) return;
+  try {
+    nativeAudio = new Audio();
+    nativeAudio.preload = "metadata";
+
+    nativeAudio.addEventListener("play", () => {
+      setPlayBtns("⏸");
+      startProgress();
+      updateMediaSession();
+    });
+
+    nativeAudio.addEventListener("pause", () => {
+      setPlayBtns("▶");
+      stopProgress();
+    });
+
+    nativeAudio.addEventListener("ended", () => {
+      stopProgress();
+      if (isRepeat) {
+        selectAndPlay(currentIndex);
+      } else {
+        nextTrack();
+      }
+    });
+
+    nativeAudio.addEventListener("error", (e) => {
+      console.warn("nativeAudio error, falling back to YouTube:", e);
+      const track = currentList[currentIndex];
+      if (track && track.id) {
+        loadYT(track.id, true);
+      }
+    });
+  } catch(e) {
+    console.warn("initNativeAudio error:", e);
+  }
+}
+
+function updateMediaSession() {
+  if (!('mediaSession' in navigator) || !currentList || currentIndex < 0) return;
+  const t = currentList[currentIndex];
+  if (!t) return;
+  try {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: t.title,
+      artist: t.artist,
+      album: "Durga Puja Collection",
+      artwork: [
+        { src: `https://img.youtube.com/vi/${t.id}/hqdefault.jpg`, sizes: "480x360", type: "image/jpeg" }
+      ]
+    });
+    navigator.mediaSession.setActionHandler('play', () => togglePlayPause());
+    navigator.mediaSession.setActionHandler('pause', () => togglePlayPause());
+    navigator.mediaSession.setActionHandler('previoustrack', () => prevTrack());
+    navigator.mediaSession.setActionHandler('nexttrack', () => nextTrack());
+  } catch(e) {}
+}
+
 function selectAndPlay(idx) {
   if (idx < 0 || idx >= currentList.length) return;
+  initNativeAudio();
   try { stopDhakWithFade(350); } catch(e) {}
   currentIndex = idx;
   const track = currentList[idx];
@@ -2229,20 +2290,68 @@ function selectAndPlay(idx) {
     localStorage.setItem("durga_pujo_saved_track_id", track.id);
   } catch(e) {}
   renderPlayerUI(idx);
-  setPlayBtns("⏸");
-  loadYT(track.id, true);
   resetProgress();
+
+  if (track.src) {
+    try {
+      if (ytPlayer && ytPlayer.pauseVideo && ytPlayer.getPlayerState && ytPlayer.getPlayerState() === YT.PlayerState.PLAYING) {
+        ytPlayer.pauseVideo();
+      }
+    } catch(e) {}
+
+    if (nativeAudio) {
+      if (!nativeAudio.src || !nativeAudio.src.endsWith(track.src)) {
+        nativeAudio.src = track.src;
+      }
+      nativeAudio.currentTime = 0;
+      const playPromise = nativeAudio.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          setPlayBtns("⏸");
+          startProgress();
+          updateMediaSession();
+        }).catch(err => {
+          console.warn("nativeAudio.play() error:", err);
+          setPlayBtns("▶");
+        });
+      }
+    }
+  } else {
+    if (nativeAudio && !nativeAudio.paused) {
+      nativeAudio.pause();
+    }
+    setPlayBtns("⏸");
+    loadYT(track.id, true);
+  }
 }
 
 function selectTrack(idx) {
   if (idx < 0 || idx >= currentList.length) return;
+  initNativeAudio();
   currentIndex = idx;
   const track = currentList[idx];
   playingId = track.id;
   renderPlayerUI(idx);
   setPlayBtns("▶");
-  loadYT(track.id, false);
   resetProgress();
+
+  if (track.src) {
+    try {
+      if (ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
+    } catch(e) {}
+    if (nativeAudio) {
+      nativeAudio.pause();
+      if (!nativeAudio.src || !nativeAudio.src.endsWith(track.src)) {
+        nativeAudio.src = track.src;
+      }
+      nativeAudio.currentTime = 0;
+    }
+  } else {
+    if (nativeAudio && !nativeAudio.paused) {
+      nativeAudio.pause();
+    }
+    loadYT(track.id, false);
+  }
 }
 
 function setPlayBtns(state) {
@@ -2256,15 +2365,47 @@ function setPlayBtns(state) {
 }
 
 function togglePlayPause() {
+  initNativeAudio();
   if (!playingId && currentList.length > 0) {
     selectAndPlay(0);
     return;
   }
+  const track = currentList[currentIndex];
+  if (!track) return;
+
+  if (track.src && nativeAudio) {
+    if (nativeAudio.paused) {
+      try { stopDhakWithFade(350); } catch(e) {}
+      try {
+        if (ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
+      } catch(e) {}
+      if (!nativeAudio.src || !nativeAudio.src.endsWith(track.src)) {
+        nativeAudio.src = track.src;
+      }
+      const playPromise = nativeAudio.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          setPlayBtns("⏸");
+          startProgress();
+          updateMediaSession();
+        }).catch(err => {
+          console.warn("togglePlayPause nativeAudio error:", err);
+        });
+      }
+    } else {
+      nativeAudio.pause();
+      setPlayBtns("▶");
+      stopProgress();
+    }
+    return;
+  }
+
   if (!ytReady || !ytPlayer || !ytPlayer.getPlayerState) {
     if (playingId) loadYT(playingId, true);
     return;
   }
   try {
+    if (nativeAudio && !nativeAudio.paused) nativeAudio.pause();
     if (ytPlayer.unMute) ytPlayer.unMute();
     if (ytPlayer.setVolume) ytPlayer.setVolume(100);
     const state = ytPlayer.getPlayerState();
@@ -2274,7 +2415,6 @@ function togglePlayPause() {
       try { stopDhakWithFade(350); } catch(e) {}
       ytPlayer.playVideo();
     } else {
-      // Cued (5), unstarted (-1), ended (0)
       if (currentIndex !== -1 && currentList[currentIndex]) {
         selectAndPlay(currentIndex);
       } else {
@@ -2305,12 +2445,20 @@ function nextTrack() {
 
 function prevTrack() {
   if (!currentList.length) return;
-  try {
-    if (ytPlayer && ytPlayer.getCurrentTime && ytPlayer.getCurrentTime() > 3) {
-      ytPlayer.seekTo(0, true);
+  const track = currentList[currentIndex];
+  if (track && track.src && nativeAudio) {
+    if (nativeAudio.currentTime > 3) {
+      nativeAudio.currentTime = 0;
       return;
     }
-  } catch(e) {}
+  } else {
+    try {
+      if (ytPlayer && ytPlayer.getCurrentTime && ytPlayer.getCurrentTime() > 3) {
+        ytPlayer.seekTo(0, true);
+        return;
+      }
+    } catch(e) {}
+  }
   const prevIdx = (currentIndex - 1 + currentList.length) % currentList.length;
   selectAndPlay(prevIdx);
 }
@@ -2318,20 +2466,28 @@ function prevTrack() {
 function startProgress() {
   stopProgress();
   progressTimer = setInterval(() => {
-    if (!ytReady || !ytPlayer || !ytPlayer.getCurrentTime) return;
-    try {
-      const cur = ytPlayer.getCurrentTime() || 0;
-      const dur = ytPlayer.getDuration() || 0;
-      const curEl = document.getElementById('dpCurrentTime');
-      const durEl = document.getElementById('dpDuration');
-      const fillEl = document.getElementById('dpProgressFill');
-      if (curEl) curEl.textContent = formatDuration(cur);
-      if (dur && dur > 0) {
-        if (durEl) durEl.textContent = formatDuration(dur);
-        if (fillEl) fillEl.style.width = Math.min(100, (cur / dur) * 100) + "%";
-      }
-    } catch(e) {}
-  }, 400);
+    const track = currentList[currentIndex];
+    let cur = 0, dur = 0;
+    if (track && track.src && nativeAudio) {
+      cur = nativeAudio.currentTime || 0;
+      dur = nativeAudio.duration || 0;
+    } else if (ytReady && ytPlayer && ytPlayer.getCurrentTime) {
+      try {
+        cur = ytPlayer.getCurrentTime() || 0;
+        dur = ytPlayer.getDuration() || 0;
+      } catch(e) {}
+    } else {
+      return;
+    }
+    const curEl = document.getElementById('dpCurrentTime');
+    const durEl = document.getElementById('dpDuration');
+    const fillEl = document.getElementById('dpProgressFill');
+    if (curEl) curEl.textContent = formatDuration(cur);
+    if (dur && dur > 0) {
+      if (durEl) durEl.textContent = formatDuration(dur);
+      if (fillEl) fillEl.style.width = Math.min(100, (cur / dur) * 100) + "%";
+    }
+  }, 250);
 }
 
 function stopProgress() {
@@ -2500,10 +2656,14 @@ function loadYT(id, autoplay) {
 }
 
 function onPlayerStateChange(e) {
+  const track = currentList[currentIndex];
+  if (track && track.src) return;
+
   if (e.data === YT.PlayerState.PLAYING) {
     errorSkips = 0;
     setPlayBtns("⏸");
     startProgress();
+    updateMediaSession();
   } else if (e.data === YT.PlayerState.PAUSED) {
     setPlayBtns("▶");
     stopProgress();
@@ -2518,6 +2678,8 @@ function onPlayerStateChange(e) {
 }
 
 function onPlayerError(e) {
+  const track = currentList[currentIndex];
+  if (track && track.src) return;
   const code = e && e.data ? e.data : "unknown";
   console.warn("YouTube player error:", code, "Track ID:", playingId);
   errorSkips++;
@@ -2620,14 +2782,24 @@ function wireButtons() {
   const bar = document.getElementById("dpProgressBar");
   if (bar) {
     bar.addEventListener("click", (e) => {
-      if (!ytPlayer || !ytPlayer.getDuration) return;
+      const track = currentList[currentIndex];
       const rect = bar.getBoundingClientRect();
       const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-      const dur = ytPlayer.getDuration() || 0;
-      if (dur > 0) {
-        ytPlayer.seekTo(pos * dur, true);
-        const fill = document.getElementById("dpProgressFill");
-        if (fill) fill.style.width = (pos * 100) + "%";
+      if (track && track.src && nativeAudio) {
+        const dur = nativeAudio.duration || 0;
+        if (dur > 0) {
+          nativeAudio.currentTime = pos * dur;
+          const fill = document.getElementById("dpProgressFill");
+          if (fill) fill.style.width = (pos * 100) + "%";
+        }
+      } else {
+        if (!ytPlayer || !ytPlayer.getDuration) return;
+        const dur = ytPlayer.getDuration() || 0;
+        if (dur > 0) {
+          ytPlayer.seekTo(pos * dur, true);
+          const fill = document.getElementById("dpProgressFill");
+          if (fill) fill.style.width = (pos * 100) + "%";
+        }
       }
     });
   }

@@ -1,0 +1,2620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>দেবীপক্ষ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://www.youtube.com">
+<link rel="preconnect" href="https://i.ytimg.com">
+<link rel="preconnect" href="https://s.ytimg.com">
+<link rel="dns-prefetch" href="https://www.google.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪔</text></svg>">
+<style>
+  :root {
+    --amber: #c9812f;
+    --ember: #b4491f;
+    --gold: #e8b64b;
+    --gold-bright: #ffd873;
+    --cream: #fdf3e2;
+    --ink: #050302;
+    --red-sindoor: #c0392b;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Inter', 'Noto Sans Bengali', sans-serif;
+    background: var(--ink);
+    color: var(--cream);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+  button { font-family: inherit; cursor: pointer; }
+  a { color: inherit; text-decoration: none; }
+  input { font-family: inherit; }
+
+  /* ── Stage ── */
+  .stage { position: fixed; inset: 0; z-index: 0; overflow: hidden; background: #0a0402; }
+  .photo-wrap { position: absolute; inset: 0; }
+  .photo-ambient {
+    position: absolute; inset: -6%;
+    width: 112%; height: 112%;
+    object-fit: cover; object-position: center center;
+    filter: blur(48px) brightness(0.55) saturate(1.35);
+    transition: opacity 1.8s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    pointer-events: none;
+    will-change: opacity;
+    backface-visibility: hidden;
+  }
+  .photo-ambient.active { opacity: 0.88; }
+  .photo-glow {
+    position: absolute; inset: -8%;
+    width: 116%; height: 116%;
+    pointer-events: none;
+    transition: opacity 1.8s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    will-change: opacity;
+    mix-blend-mode: screen;
+  }
+  .photo-glow.active { opacity: 0.95; }
+  .photo {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    box-sizing: border-box;
+    padding: 2.8vh 3.5vw;
+    object-fit: contain;
+    object-position: center center;
+    display: block;
+    filter: drop-shadow(0 0 45px rgba(0, 0, 0, 0.92)) drop-shadow(0 0 35px var(--photo-glow-color, transparent)) saturate(1.0) contrast(1.02) brightness(0.99);
+    transition: opacity 1.8s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    will-change: opacity;
+    backface-visibility: hidden;
+  }
+  .photo.active { opacity: 1; }
+  .photo.fit-contain {
+    object-fit: contain !important;
+    object-position: center center !important;
+  }
+  .photo-credit {
+    position: fixed; bottom: 84px; right: 18px; z-index: 85;
+    background: rgba(14, 4, 6, 0.84);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(232, 182, 75, 0.4);
+    color: var(--cream);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: .4px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.65);
+    display: none;
+    align-items: center;
+    gap: 6px;
+    pointer-events: auto;
+    transition: opacity .4s ease, transform .3s ease;
+  }
+  .photo-credit .credit-name {
+    color: var(--gold-bright);
+    font-weight: 700;
+  }
+  @media (max-width: 600px) {
+    .photo-credit {
+      bottom: 74px;
+      right: 12px;
+      font-size: 10.5px;
+      padding: 4px 10px;
+    }
+  }
+  .grain {
+    position: absolute; inset: -50%; width: 200%; height: 200%; pointer-events: none;
+    mix-blend-mode: overlay; opacity: 0.13;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    animation: grainShift 0.6s steps(4) infinite;
+  }
+  @keyframes grainShift {
+    0%  { transform: translate(0%, 0%); }
+    25% { transform: translate(-1%, 1%); }
+    50% { transform: translate(1%, -1%); }
+    75% { transform: translate(-1.5%, -0.5%); }
+  }
+  .vignette {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at 50% 55%, rgba(0,0,0,0) 32%, rgba(3,1,0,.65) 84%, rgba(2,1,0,.9) 100%);
+  }
+  .grade {
+    position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(180deg, rgba(8,3,1,.7) 0%, rgba(0,0,0,0) 25%, rgba(0,0,0,0) 60%, rgba(5,2,1,.82) 100%);
+  }
+  .heritage-warmth {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at 50% 20%, rgba(138, 28, 36, 0.08) 0%, rgba(45, 10, 14, 0.12) 55%, rgba(15, 3, 5, 0.25) 100%);
+    mix-blend-mode: soft-light;
+    opacity: 0.4;
+  }
+  @media (prefers-reduced-motion: reduce) { .photo { animation: none; } .grain { animation: none; } }
+
+  /* ── Top bar ── */
+  .topbar {
+    position: relative; z-index: 6;
+    display: flex; justify-content: flex-end; align-items: center;
+    padding: 13px 18px; gap: 10px;
+  }
+  .brand {
+    font-family: 'Noto Sans Bengali', 'Inter', sans-serif;
+    font-weight: 700; font-size: 15px; color: var(--gold-bright); letter-spacing: .3px;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .brand-sub { opacity: .6; font-weight: 500; font-size: 11px; font-family: 'Inter', sans-serif; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .icon-btn {
+    background: rgba(0,0,0,.4); border: 1px solid rgba(232,182,75,.3); color: var(--gold-bright);
+    width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(6px); font-size: 14px; transition: background .2s, transform .15s; flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .icon-btn:hover { background: rgba(232,182,75,.18); transform: scale(1.06); }
+
+  /* ── Countdown ── */
+  .countdown-strip {
+    position: relative; z-index: 6;
+    display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;
+    padding: 4px 16px 0; font-size: 11px; color: var(--gold-bright); text-align: center;
+    text-shadow: 0 1px 5px rgba(0,0,0,.8);
+  }
+  .cd-label { opacity: .85; font-weight: 600; letter-spacing: .3px; }
+  .cd-units { display: flex; gap: 5px; font-variant-numeric: tabular-nums; }
+  .cd-unit {
+    background: rgba(0,0,0,.38); border: 1px solid rgba(232,182,75,.28); border-radius: 8px;
+    padding: 3px 8px; font-weight: 700;
+  }
+  .cd-unit span { opacity: .6; font-weight: 500; font-size: 9px; margin-left: 2px; }
+
+  /* ── Day selector ── */
+  .day-selector {
+    position: relative; z-index: 6;
+    display: flex; gap: 8px; padding: 8px 16px 10px;
+    overflow-x: auto; scrollbar-width: thin; -webkit-overflow-scrolling: touch;
+  }
+  .day-selector::-webkit-scrollbar { height: 4px; }
+  .day-selector::-webkit-scrollbar-thumb { background: rgba(232,182,75,.3); border-radius: 999px; }
+  .day-pill {
+    flex-shrink: 0; background: rgba(0,0,0,.4); border: 1px solid rgba(232,182,75,.22); color: var(--cream);
+    padding: 10px 16px; min-height: 40px; border-radius: 999px; font-size: 12px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+    backdrop-filter: blur(8px); transition: background .22s, border-color .22s, transform .12s, box-shadow .22s;
+    opacity: .78; -webkit-tap-highlight-color: transparent; user-select: none;
+  }
+  .day-pill .bn { font-family: 'Noto Sans Bengali', sans-serif; font-weight: 600; font-size: 13px; }
+  .day-pill .en { font-size: 9px; letter-spacing: .5px; text-transform: uppercase; opacity: .7; }
+  .day-pill .dt { font-size: 8.5px; opacity: .55; letter-spacing: .3px; }
+  .day-pill:hover { transform: translateY(-2px); opacity: 1; }
+  .day-pill.active {
+    background: rgba(232,182,75,.2); border-color: var(--gold-bright); color: var(--gold-bright); opacity: 1;
+    box-shadow: 0 6px 20px rgba(0,0,0,.4), 0 0 20px rgba(255,216,115,.18);
+  }
+
+  /* ── Controls row ── */
+  .controls-row {
+    position: relative; z-index: 6;
+    display: flex; justify-content: center; gap: 9px; padding: 0 16px 8px; align-items: center;
+  }
+  .toggle-btn {
+    background: rgba(0,0,0,.42); border: 1px solid rgba(232,182,75,.3); color: var(--cream);
+    padding: 9px 18px; min-height: 40px; border-radius: 999px; font-size: 12.5px; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 7px;
+    backdrop-filter: blur(8px); transition: background .22s, border-color .22s, transform .12s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .toggle-btn:hover { transform: translateY(-1px); border-color: var(--gold-bright); }
+  .toggle-btn.on { background: rgba(232,182,75,.2); border-color: var(--gold-bright); color: var(--gold-bright); }
+
+  /* ── Mood heading ── */
+  .mood-heading-row {
+    position: relative; z-index: 5; max-width: 940px; margin: 8px auto 4px;
+    text-align: center; padding: 0 16px;
+  }
+  .mood-heading-row h1 {
+    font-family: 'Cormorant Garamond', serif; font-weight: 700;
+    font-size: clamp(2.1rem, 6vw, 3.5rem); color: var(--gold-bright);
+    text-shadow: 0 2px 6px rgba(0,0,0,.85), 0 6px 26px rgba(0,0,0,.65);
+    letter-spacing: .3px; transition: opacity .4s ease;
+  }
+  .mood-tagline {
+    font-family: 'Cormorant Garamond', serif; font-weight: 600;
+    font-size: clamp(1rem, 2.4vw, 1.28rem); color: var(--cream); opacity: .92;
+    margin-top: 4px; text-shadow: 0 1px 4px rgba(0,0,0,.85), 0 4px 14px rgba(0,0,0,.6);
+  }
+  .mood-copy {
+    font-size: 12px; color: var(--cream); opacity: .78; margin-top: 7px;
+    line-height: 1.6; max-width: 500px; margin-left: auto; margin-right: auto;
+    text-shadow: 0 1px 6px rgba(0,0,0,.75); font-style: italic;
+  }
+
+  /* ── Main content ── */
+  main {
+    position: relative; z-index: 5; max-width: 680px;
+    margin: clamp(120px, 24vh, 260px) auto 0;
+    padding: 0 16px calc(10px + env(safe-area-inset-bottom));
+    display: flex; flex-direction: column; gap: 8px;
+  }
+
+  /* ── Fact banner (Did You Know) ── */
+  .fact-banner {
+    background: rgba(8, 4, 3, 0.48);
+    border: 1px solid rgba(232, 182, 75, 0.22);
+    border-radius: 16px;
+    padding: 11px 15px 12px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    cursor: pointer;
+    user-select: none;
+    transition: border-color .22s, background .22s, transform .18s ease, box-shadow .22s;
+    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.45), 0 0 16px rgba(232, 182, 75, 0.06);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    z-index: 10;
+  }
+  .fact-banner:hover {
+    border-color: var(--gold-bright);
+    background: rgba(14, 6, 4, 0.65);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.58), 0 0 22px rgba(255, 216, 115, 0.14);
+  }
+  .fb-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 7px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(232, 182, 75, 0.16);
+    flex-shrink: 0;
+  }
+  .fb-title {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold-bright);
+    opacity: .9;
+  }
+  .fb-dots { display: flex; gap: 5px; align-items: center; }
+  .fb-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: rgba(232, 182, 75, 0.3);
+    transition: background .22s, transform .22s, box-shadow .22s;
+  }
+  .fb-dot.active {
+    background: var(--gold-bright);
+    transform: scale(1.3);
+    box-shadow: 0 0 6px rgba(255, 216, 115, 0.5);
+  }
+  .fb-text {
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: var(--cream);
+    opacity: .92;
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    transition: opacity .22s ease;
+  }
+  .fb-text.fading { opacity: 0; }
+
+  @media (min-width: 900px) {
+    .fact-banner {
+      position: absolute;
+      top: 56px;
+      right: clamp(16px, 2.5vw, 36px);
+      width: clamp(260px, 22vw, 315px);
+      min-height: 84px;
+      height: auto;
+    }
+  }
+
+  @media (max-width: 899px) {
+    .fact-banner {
+      position: relative;
+      margin: 12px auto 4px;
+      width: calc(100% - 32px);
+      max-width: 480px;
+      min-height: unset;
+      aspect-ratio: auto;
+    }
+  }
+
+  /* ── Devipaksha-Style Puja Radio Player & Dhak ── */
+  .dp-pills-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 6;
+  }
+  .dp-pill-btn, .dp-dhak-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+    padding: 7px 15px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    transition: background .2s, border-color .2s, transform .12s, box-shadow .2s;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .dp-pill-btn:hover, .dp-dhak-btn:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.28);
+    color: #ffffff;
+    transform: translateY(-1px);
+  }
+  .dp-pill-btn:active, .dp-dhak-btn:active {
+    transform: scale(0.96);
+  }
+  .dp-pill-count {
+    font-size: 9.5px;
+    font-weight: 500;
+    opacity: 0.7;
+    background: rgba(255, 255, 255, 0.12);
+    padding: 2px 7px;
+    border-radius: 999px;
+    letter-spacing: normal;
+  }
+  .dp-pill-chevron {
+    font-size: 11px;
+    opacity: 0.7;
+    transition: transform .25s ease;
+  }
+  .dp-pill-btn.open .dp-pill-chevron {
+    transform: rotate(180deg);
+  }
+  
+  /* Dhak Button Active State */
+  .dp-dhak-btn.active {
+    color: #f1d449;
+    background: rgba(241, 212, 73, 0.2);
+    border-color: rgba(241, 212, 73, 0.55);
+    box-shadow: 0 0 22px rgba(241, 212, 73, 0.45);
+    animation: dhakGlowPulse 1.4s ease-in-out infinite;
+  }
+  @keyframes dhakGlowPulse {
+    0%, 100% { box-shadow: 0 0 16px rgba(241, 212, 73, 0.35); }
+    50% { box-shadow: 0 0 28px rgba(241, 212, 73, 0.65); transform: scale(1.02); }
+  }
+  .dp-dhak-icon {
+    font-size: 13px;
+    line-height: 1;
+  }
+
+  /* Main Player Card */
+  .dp-player-card {
+    background: rgba(14, 7, 5, 0.76);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 26px;
+    padding: 14px 18px;
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    box-shadow: 0 16px 50px rgba(0, 0, 0, 0.55), 0 0 25px rgba(232, 182, 75, 0.08);
+    position: relative;
+    z-index: 6;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .dp-card-main {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  
+  /* Album Art */
+  .dp-art-wrap {
+    width: 68px;
+    height: 68px;
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: #110505;
+  }
+  .dp-art-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    transition: transform .3s ease;
+  }
+  .dp-art-wrap:hover .dp-art-img {
+    transform: scale(1.05);
+  }
+  .dp-art-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    display: flex;
+    align-items: flex-end;
+    padding: 6px;
+    opacity: 0;
+    transition: opacity .25s;
+    pointer-events: none;
+  }
+  .dp-player-card.is-playing .dp-art-overlay {
+    opacity: 1;
+  }
+  .dp-art-eq {
+    display: flex;
+    align-items: flex-end;
+    gap: 2.5px;
+    height: 14px;
+  }
+  .dp-art-eq span {
+    width: 2.5px;
+    background: #f1d449;
+    border-radius: 1px;
+    height: 4px;
+  }
+  .dp-player-card.is-playing .dp-art-eq span {
+    animation: dpEqBounce 0.8s ease infinite alternate;
+  }
+  .dp-art-eq span:nth-child(1) { animation-delay: 0.1s; }
+  .dp-art-eq span:nth-child(2) { animation-delay: 0.35s; }
+  .dp-art-eq span:nth-child(3) { animation-delay: 0.2s; }
+  .dp-art-eq span:nth-child(4) { animation-delay: 0.45s; }
+  @keyframes dpEqBounce {
+    0% { height: 3px; }
+    100% { height: 13px; }
+  }
+
+  /* Track Meta & Scrubber */
+  .dp-meta-wrap {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .dp-track-title {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+  }
+  .dp-track-artist {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.7);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 2px;
+  }
+  
+  /* Scrubber bar */
+  .dp-progress-wrap {
+    margin-top: 6px;
+  }
+  .dp-progress-bar {
+    height: 12px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    user-select: none;
+    touch-action: none;
+  }
+  .dp-progress-track {
+    height: 4px;
+    width: 100%;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    overflow: hidden;
+    position: relative;
+  }
+  .dp-progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #ffd873, #ffffff);
+    width: 0%;
+    transition: width 0.15s linear;
+  }
+  .dp-time-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9.5px;
+    color: rgba(255, 255, 255, 0.55);
+    font-variant-numeric: tabular-nums;
+    margin-top: 1px;
+    font-weight: 500;
+  }
+
+  /* Transport Controls */
+  .dp-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .dp-ctrl-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all .15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .dp-ctrl-btn:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .dp-ctrl-btn:active {
+    transform: scale(0.92);
+  }
+  .dp-ctrl-btn.active {
+    color: #f1d449;
+    background: rgba(241, 212, 73, 0.16);
+  }
+  .dp-play-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #0b0503;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+    border: none;
+    cursor: pointer;
+    transition: transform .14s ease, background .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .dp-play-btn:hover {
+    transform: scale(1.06);
+    background: #ffd873;
+  }
+  .dp-play-btn:active {
+    transform: scale(0.94);
+  }
+
+  /* Mobile toolbar */
+  .dp-mobile-toolbar {
+    display: none;
+    grid-template-columns: 1fr 1fr 1fr;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 10px;
+    padding-top: 8px;
+    gap: 4px;
+  }
+  .dp-mob-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.75);
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .dp-mob-btn.active {
+    color: #f1d449;
+    background: rgba(241, 212, 73, 0.14);
+  }
+  @media (max-width: 580px) {
+    .dp-controls #dpShuffleBtn,
+    .dp-controls #dpRepeatBtn {
+      display: none;
+    }
+    .dp-mobile-toolbar {
+      display: grid;
+    }
+    .dp-player-card {
+      padding: 12px 14px;
+    }
+  }
+
+  /* ── Devipaksha-Style Fullscreen Blurred Playlist Modal ── */
+  .dp-playlist-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: rgba(10, 4, 3, 0.72);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease;
+  }
+  .dp-playlist-modal-backdrop.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .dp-modal-dialog {
+    width: 100%;
+    max-width: 560px;
+    height: 82vh;
+    max-height: 700px;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(160deg, rgba(28, 12, 10, 0.95) 0%, rgba(14, 6, 5, 0.98) 100%);
+    border: 1px solid rgba(232, 182, 75, 0.35);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 35px rgba(232, 182, 75, 0.16);
+    border-radius: 22px;
+    overflow: hidden;
+    transform: scale(0.95) translateY(12px);
+    transition: transform .25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .dp-playlist-modal-backdrop.open .dp-modal-dialog {
+    transform: scale(1) translateY(0);
+  }
+  .dp-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
+    flex-shrink: 0;
+  }
+  .dp-modal-title-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .dp-modal-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 19px;
+    font-weight: 800;
+    color: var(--gold-bright);
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.6);
+  }
+  .dp-modal-sub {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.65);
+    letter-spacing: 0.5px;
+  }
+  .dp-modal-close-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: var(--cream);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 15px;
+    transition: all .18s;
+  }
+  .dp-modal-close-btn:hover {
+    background: rgba(232, 182, 75, 0.25);
+    color: #fff;
+    border-color: rgba(232, 182, 75, 0.5);
+    transform: scale(1.06);
+  }
+  .dp-modal-search-wrap {
+    padding: 10px 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    flex-shrink: 0;
+  }
+  .dp-modal-search-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 13px;
+    color: #ffffff;
+    font-family: inherit;
+  }
+  .dp-modal-search-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+  }
+  .dp-modal-search-clear {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .dp-modal-search-clear:hover {
+    color: #fff;
+  }
+  .dp-modal-tracklist-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 14px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .dp-modal-tracklist-scroll::-webkit-scrollbar { width: 5px; }
+  .dp-modal-tracklist-scroll::-webkit-scrollbar-thumb { background: rgba(232, 182, 75, 0.4); border-radius: 999px; }
+
+  /* Track Row in Modal */
+  .dp-track-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: transparent;
+    transition: background .16s ease, border-color .16s ease, transform .12s;
+    cursor: pointer;
+    user-select: none;
+    border: 1px solid transparent;
+  }
+  .dp-track-row:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+  .dp-track-row.active {
+    background: rgba(232, 182, 75, 0.16);
+    border-color: rgba(241, 212, 73, 0.4);
+  }
+  .dp-row-num {
+    width: 22px;
+    text-align: center;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    color: rgba(255, 255, 255, 0.45);
+    flex-shrink: 0;
+  }
+  .dp-track-row.active .dp-row-num {
+    color: #f1d449;
+    font-weight: 700;
+  }
+  .dp-row-thumb {
+    width: 42px;
+    height: 42px;
+    border-radius: 9px;
+    overflow: hidden;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    background: #110505;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+  .dp-row-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .dp-row-meta {
+    flex: 1;
+    min-width: 0;
+  }
+  .dp-row-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.96);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .dp-track-row.active .dp-row-title {
+    color: #f1d449;
+  }
+  .dp-row-artist {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.65);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 2px;
+  }
+  .dp-row-dur {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.5);
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+
+/* File protocol banner */
+  .file-banner {
+    position: sticky; top: 0; z-index: 99999;
+    background: linear-gradient(90deg, #7c1a1a, #c0392b);
+    color: #fff; padding: 9px 16px; font-size: 13px; text-align: center;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.5); display: none;
+  }
+  .file-banner-content {
+    display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px;
+  }
+  .file-banner-btn {
+    background: #fdf3d1; color: #7c1a1a; font-weight: 700;
+    padding: 4px 12px; border-radius: 999px; text-decoration: none; font-size: 12px;
+    transition: transform .15s ease, background .15s ease;
+  }
+  .file-banner-btn:hover { background: #fff; transform: scale(1.04); }
+
+  /* Player Toast */
+  .player-toast {
+    position: fixed; bottom: 84px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: rgba(20,12,6,0.96); color: #f7e7c4; border: 1px solid rgba(232,182,75,0.4);
+    padding: 8px 18px; border-radius: 20px; font-size: 13px; font-family: inherit;
+    backdrop-filter: blur(12px); opacity: 0; pointer-events: none;
+    transition: opacity .25s ease, transform .25s ease; z-index: 9999;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.55); text-align: center; max-width: 90vw;
+  }
+  .player-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* Footer */
+  .site-footer {
+    position: relative; z-index: 5; text-align: center; font-size: 10px;
+    color: var(--cream); opacity: .45; padding: 6px 16px 16px;
+  }
+
+  /* Active states */
+  .day-pill:active, .cat-tab:active, .toggle-btn:active, .icon-btn:active,
+  .transport-btn:active, .transport-main:active, .queue-collapse-btn:active,
+  .mini-track:active,
+  .npbar-chevron:active, .npbar-meta:active, .fact-banner:active,
+  .np-play-btn:active, .npbar-art-slot:active { transform: scale(.96); transition: transform .07s ease; }
+  .transport-main:active { transform: scale(.92); }
+
+  @media (max-width: 520px) {
+    main { padding-left: 12px; padding-right: 12px; }
+    .np-expanded-sheet-inner { max-width: none; }
+    .np-expanded-sheet { padding-left: 10px; padding-right: 10px; }
+    .now-playing-bar { padding-left: 10px; padding-right: 10px; }
+    .mini-track .a { max-width: 78px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Background Stage ── -->
+<div class="stage" id="stage">
+  <div class="photo-wrap" id="photoWrap">
+    <img class="photo-ambient active" id="bgAmbientA" src="./images/devdutta_kumartuli_durga_trinayana.jpg" alt="" style="opacity: 0.85;">
+    <img class="photo-ambient" id="bgAmbientB" src="" alt="" style="opacity: 0;">
+    <div class="photo-glow active" id="bgGlowA" style="opacity: 0;"></div>
+    <div class="photo-glow" id="bgGlowB" style="opacity: 0;"></div>
+    <img class="photo active" id="bgPhotoA" src="./images/devdutta_kumartuli_durga_trinayana.jpg" alt="Durga Puja backdrop" style="opacity: 1;">
+    <img class="photo" id="bgPhotoB" src="" alt="Durga Puja backdrop" style="opacity: 0;">
+  </div>
+  <div class="grain"></div>
+  <div class="vignette"></div>
+  <div class="grade"></div>
+  <div class="heritage-warmth"></div>
+</div>
+<div class="photo-credit" id="photoCredit" style="display: inline-flex;">
+  📸 Photo: <span class="credit-name">Devdutta Roy</span>
+</div>
+
+<!-- ── Protocol banner for file:// ── -->
+<div id="fileProtocolBanner" class="file-banner">
+  <div class="file-banner-content">
+    <span>⚡ <strong>Local Server Active:</strong> For seamless YouTube music and video, open via:</span>
+    <a href="http://localhost:3000" class="file-banner-btn">Open http://localhost:3000</a>
+  </div>
+</div>
+
+<!-- ── Top Bar ── -->
+<div class="topbar">
+  <div class="topbar-right">
+    <button class="icon-btn" id="fsBtn" title="Fullscreen">⛶</button>
+  </div>
+</div>
+
+<!-- ── Countdown ── -->
+<div class="countdown-strip" id="countdownStrip">
+  <span class="cd-label" id="cdLabel">Mahalaya arrives in</span>
+  <div class="cd-units" id="cdUnits">
+    <div class="cd-unit"><span id="cdD">--</span><span>d</span></div>
+    <div class="cd-unit"><span id="cdH">--</span><span>h</span></div>
+    <div class="cd-unit"><span id="cdM">--</span><span>m</span></div>
+    <div class="cd-unit"><span id="cdS">--</span><span>s</span></div>
+  </div>
+</div>
+
+<!-- ── Day Selector ── -->
+<div class="day-selector" id="daySelector"></div>
+
+<!-- ── Controls Row ── -->
+<div class="controls-row">
+  <button class="toggle-btn" id="dayNightBtn" type="button">
+    <span id="dayNightIcon">☀️</span><span id="dayNightLabel">Day</span>
+  </button>
+</div>
+
+<!-- ── Mood Heading ── -->
+<div class="mood-heading-row">
+  <h1 id="dayTitle">মহালয়া</h1>
+  <div class="mood-tagline" id="dayTagline">The Goddess Is Coming</div>
+  <div class="mood-copy" id="moodCopy">sacred, nostalgic, early-morning radio</div>
+</div>
+
+<!-- ── Fact banner (Did You Know) ── -->
+<div class="fact-banner" id="factBanner" title="Click to see another fact">
+  <div class="fb-head">
+    <div class="fb-title">Did You Know</div>
+    <div class="fb-dots" id="fbDots"></div>
+  </div>
+  <div class="fb-text" id="fbText"></div>
+</div>
+
+<!-- ── Main ── -->
+<main>
+
+  <!-- ── Devipaksha-Style Pills Row ── -->
+  <div class="dp-pills-row">
+    <button class="dp-pill-btn" id="dpPlaylistBtn" type="button" aria-label="Open Puja Radio Playlist">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="4" cy="6" r="1" fill="currentColor"/><circle cx="4" cy="12" r="1" fill="currentColor"/><circle cx="4" cy="18" r="1" fill="currentColor"/></svg>
+      <span class="dp-pill-label">PUJA RADIO</span>
+      <span class="dp-pill-chevron" id="dpPillChevron">▾</span>
+    </button>
+    <button class="dp-dhak-btn" id="dpDhakBtn" type="button" aria-label="Play Dhak Beat">
+      <svg class="dp-dhak-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+      <span>DHAK</span>
+    </button>
+  </div>
+
+  <!-- ── Devipaksha-Style Player Card ── -->
+  <div class="dp-player-card" id="dpPlayerCard">
+    <div class="dp-card-main">
+      <!-- Album Art Thumbnail -->
+      <div class="dp-art-wrap" id="dpArtWrap">
+        <img id="dpArtImg" src="https://img.youtube.com/vi/SFJeglBF5cg/mqdefault.jpg" alt="Track thumbnail" class="dp-art-img" onerror="this.src='images/sagnik_ashtami_night_durga_pradip.jpg'"/>
+        <div class="dp-art-overlay">
+          <div class="dp-art-eq" id="dpArtEq">
+            <span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Meta & Progress Bar -->
+      <div class="dp-meta-wrap">
+        <div class="dp-track-title" id="dpTitle">Dugga Elo</div>
+        <div class="dp-track-artist" id="dpArtist">Monali Thakur</div>
+        
+        <!-- Progress scrubber -->
+        <div class="dp-progress-wrap">
+          <div class="dp-progress-bar" id="dpProgressBar" role="slider" aria-label="Seek track">
+            <div class="dp-progress-track">
+              <div class="dp-progress-fill" id="dpProgressFill"></div>
+            </div>
+            <div class="dp-progress-thumb" id="dpProgressThumb"></div>
+          </div>
+          <div class="dp-time-row">
+            <span id="dpCurrentTime">0:00</span>
+            <span id="dpDuration">2:27</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Desktop Transport Controls -->
+      <div class="dp-controls">
+        <button class="dp-ctrl-btn" id="dpShuffleBtn" title="Shuffle" type="button" aria-label="Shuffle">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+        </button>
+        <button class="dp-ctrl-btn" id="dpPrevBtn" title="Previous" type="button" aria-label="Previous track">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </button>
+        <button class="dp-play-btn" id="dpPlayBtn" title="Play / Pause" type="button" aria-label="Play">
+          <svg id="dpPlayIcon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+          <svg id="dpPauseIcon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="display:none;"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+        </button>
+        <button class="dp-ctrl-btn" id="dpNextBtn" title="Next" type="button" aria-label="Next track">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </button>
+        <button class="dp-ctrl-btn" id="dpRepeatBtn" title="Repeat" type="button" aria-label="Repeat">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile toolbar (Shuffle, Repeat, Dhak) -->
+    <div class="dp-mobile-toolbar">
+      <button class="dp-mob-btn" id="dpMobShuffleBtn" type="button"><span>🔀</span><span>Shuffle</span></button>
+      <button class="dp-mob-btn" id="dpMobRepeatBtn" type="button"><span>🔁</span><span>Repeat</span></button>
+      <button class="dp-mob-btn" id="dpMobDhakBtn" type="button"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block; vertical-align:middle;"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg><span>Dhak</span></button>
+    </div>
+  </div>
+
+
+
+</main>
+
+<!-- ── Devipaksha-Style Fullscreen Blurred Playlist Modal ── -->
+<div class="dp-playlist-modal-backdrop" id="dpPlaylistModal" aria-hidden="true">
+  <div class="dp-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="dpModalTitle">
+    <div class="dp-modal-header">
+      <div class="dp-modal-title-wrap">
+        <div class="dp-modal-title" id="dpModalTitle">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+          </svg>
+          <span>PUJA RADIO</span>
+        </div>
+        <div class="dp-modal-sub" id="dpModalSub">108 Tracks • Durga Puja Playlist</div>
+      </div>
+      <button class="dp-modal-close-btn" id="dpModalCloseBtn" type="button" aria-label="Close Playlist">✕</button>
+    </div>
+    <div class="dp-modal-search-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.6;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="dpSearchInput" class="dp-modal-search-input" placeholder="Search songs or artists…" autocomplete="off" spellcheck="false"/>
+      <button id="dpSearchClear" class="dp-modal-search-clear" type="button" style="display:none;">✕</button>
+    </div>
+    <div class="dp-modal-tracklist-scroll" id="dpModalTracklist">
+      <!-- Tracks rendered here -->
+    </div>
+  </div>
+</div>
+
+
+
+<div id="ytPlayerHost" style="position:fixed; width:240px; height:160px; right:0; bottom:0; opacity:0.001; pointer-events:none; z-index:-1;"></div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+/* ═══════════════════════════════════════════════════════
+   PHOTO MANIFEST
+   To add a real photo, set `url` to a path like "photos/your-file.jpg"
+   (drop the file in the UMA folder) and set `credit` to the name.
+   Leave `url: null` and it falls back to a stock image.
+   `credit: null` hides the credit line.
+═══════════════════════════════════════════════════════ */
+const PHOTOS = {
+  mahalaya: {
+    day: {
+      url: "./images/devdutta_kumartuli_durga_trinayana.jpg",
+      credit: "Devdutta Roy",
+      pos: "center center",
+      fit: "contain",
+      glow: "radial-gradient(ellipse at 50% 45%, rgba(245, 185, 75, 0.35) 0%, rgba(190, 105, 30, 0.17) 46%, rgba(10, 4, 2, 0) 72%)",
+      glowColor: "rgba(245, 180, 70, 0.28)"
+    },
+    night: {
+      url: "./images/devdutta_kumartuli_workshop_idols.jpg",
+      credit: "Devdutta Roy",
+      pos: "center center",
+      fit: "contain",
+      glow: "radial-gradient(ellipse at 50% 48%, rgba(255, 170, 50, 0.36) 0%, rgba(195, 80, 20, 0.18) 46%, rgba(10, 4, 2, 0) 72%)",
+      glowColor: "rgba(255, 170, 50, 0.28)"
+    }
+  },
+  shashti: {
+    day: {
+      url: "./images/ai_shashti_day_pandal_street.jpg",
+      credit: "AI Generated",
+      pos: "center center",
+      fit: "contain",
+      glow: "radial-gradient(ellipse at 50% 50%, rgba(255, 205, 75, 0.48) 0%, rgba(225, 115, 25, 0.26) 48%, rgba(10, 4, 2, 0) 76%)",
+      glowColor: "rgba(255, 195, 70, 0.38)"
+    },
+    night: {
+      url: "./images/ai_shashti_night_pandal_street.jpg",
+      credit: "AI Generated",
+      pos: "center center",
+      fit: "contain",
+      glow: "radial-gradient(ellipse at 50% 50%, rgba(255, 180, 50, 0.50) 0%, rgba(210, 75, 15, 0.28) 48%, rgba(10, 4, 2, 0) 76%)",
+      glowColor: "rgba(255, 175, 45, 0.40)"
+    }
+  },
+  saptami: {
+    day: {
+      url: "./images/ai_saptami_day_pandal_pond.jpg",
+      credit: "AI Generated",
+      pos: "center center",
+      fit: "contain",
+      glow: "radial-gradient(ellipse at 50% 50%, rgba(255, 210, 85, 0.46) 0%, rgba(225, 125, 35, 0.25) 48%, rgba(10, 4, 2, 0) 76%)",
+      glowColor: "rgba(255, 200, 80, 0.38)"
+    },
+    night: {
+      url: "./images/ai_saptami_night_kolkata_street_lights.jpg",
+      credit: "AI Generated",
+      pos: "center center",
+      fit: "contain",
+      glow: "radial-gradient(ellipse at 50% 48%, rgba(255, 185, 70, 0.46) 0%, rgba(210, 90, 25, 0.26) 48%, rgba(10, 4, 2, 0) 74%)",
+      glowColor: "rgba(255, 180, 65, 0.38)"
+    }
+  },
+  ashtami: {
+    day: {
+      url: "./images/richik_ashtami_day_durga_pratima.jpg",
+      credit: "Richik Bhattacharya",
+      pos: "center center",
+      fit: "contain",
+      glow: "radial-gradient(ellipse at 50% 48%, rgba(255, 185, 70, 0.42) 0%, rgba(225, 105, 25, 0.22) 48%, rgba(10, 4, 2, 0) 74%)",
+      glowColor: "rgba(255, 180, 65, 0.32)"
+    },
+    night: {
+      url: "./images/sagnik_ashtami_night_durga_pradip.jpg",
+      credit: "Sagnik Paul",
+      pos: "center center",
+      fit: "contain",
+      glow: "radial-gradient(ellipse at 50% 50%, rgba(245, 175, 55, 0.38) 0%, rgba(200, 95, 20, 0.18) 45%, rgba(10, 4, 2, 0) 72%)",
+      glowColor: "rgba(245, 175, 55, 0.30)"
+    }
+  },
+  nabami: {
+    day: {
+      url: "./images/sagnik_nabami_day_purohit_puja.jpg",
+      credit: "Sagnik Paul",
+      pos: "center center",
+      fit: "contain",
+      glow: "radial-gradient(ellipse at 48% 50%, rgba(255, 195, 80, 0.36) 0%, rgba(215, 85, 30, 0.20) 48%, rgba(10, 4, 2, 0) 74%)",
+      glowColor: "rgba(255, 180, 60, 0.30)"
+    },
+    night: {
+      url: "./images/ai_nabami_night_bonedi_bari_courtyard.jpg",
+      credit: "AI Generated",
+      pos: "center center",
+      fit: "contain",
+      glow: "radial-gradient(ellipse at 50% 50%, rgba(255, 170, 50, 0.44) 0%, rgba(200, 75, 20, 0.22) 48%, rgba(10, 4, 2, 0) 76%)",
+      glowColor: "rgba(255, 165, 50, 0.34)"
+    }
+  },
+  dashami: {
+    day: {
+      url: "./images/sagnik_dashami_day_darpan_bisharjan.jpg",
+      credit: "Sagnik Paul",
+      pos: "center center",
+      fit: "contain",
+      glow: "radial-gradient(ellipse at 50% 48%, rgba(255, 185, 75, 0.36) 0%, rgba(220, 50, 60, 0.22) 46%, rgba(10, 4, 2, 0) 72%)",
+      glowColor: "rgba(235, 70, 70, 0.28)"
+    },
+    night: {
+      url: "./images/richik_dashami_night_durga_pratima.jpg",
+      credit: "Richik Bhattacharya",
+      pos: "center center",
+      fit: "contain",
+      glow: "radial-gradient(ellipse at 50% 48%, rgba(245, 185, 75, 0.40) 0%, rgba(30, 60, 140, 0.28) 46%, rgba(8, 4, 3, 0) 74%)",
+      glowColor: "rgba(245, 185, 75, 0.32)"
+    }
+  }
+};
+
+/* ═══════════════════════════════════════════════════════
+   DAY + PLAYLIST DATA
+═══════════════════════════════════════════════════════ */
+const DAYS_ORDER = ["mahalaya","shashti","saptami","ashtami","nabami","dashami"];
+const TIER = { "1":"🥇","2":"🥈","3":"🥉" };
+
+const PUJA_RADIO_TRACKS = [
+  {id:"SFJeglBF5cg",title:"Dugga Elo",artist:"Monali Thakur",dur:"2:27"},
+  {id:"HeF8UhOYnq0",title:"Dugga Ma",artist:"Arijit Singh",dur:"4:31"},
+  {id:"S8WKJt7bWGg",title:"Ebar Jeno Onno Rokom Pujo",artist:"Nakash Aziz Official",dur:"3:33"},
+  {id:"7uzjfZ423Kc",title:"Dhak Baja Kashor Baja",artist:"Shreya Ghoshal Official",dur:"4:26"},
+  {id:"cAD7KutMTJw",title:"Bolo Dugga Elo",artist:"Kaushik-Guddu",dur:"3:20"},
+  {id:"w6SQsKD2U-Y",title:"Aamaar Dugga",artist:"Monali Thakur",dur:"3:20"},
+  {id:"PqdxxIAgjgk",title:"Dhaker Taley",artist:"Release",dur:"4:43"},
+  {id:"G65AupY9ge0",title:"Dugga Elo",artist:"Akriti Kakar",dur:"3:58"},
+  {id:"zSqRknvFD_s",title:"Shundori Komola",artist:"Release",dur:"3:14"},
+  {id:"RB_5ED6GIao",title:"Elo Je Maa",artist:"Abhijeet Unplugged",dur:"5:08"},
+  {id:"upYGF3YAHeo",title:"O Menoka O Menoka",artist:"ANTARA NANDY",dur:"3:16"},
+  {id:"p_hqO0sJh-I",title:"Ailo Uma Barite",artist:"ANTARA NANDY",dur:"3:53"},
+  {id:"x_Nar1eYzBM",title:"Uma Ashe Notun Saje",artist:"Ankita Bhattacharyya",dur:"3:06"},
+  {id:"I5uMBp5wDhI",title:"Abar Elo Maa",artist:"Rahul Dutta",dur:"3:07"},
+  {id:"CWtqPoZrUoA",title:"Joy Joy Durga Ma",artist:"Agnibha Bandyopadhyay",dur:"5:51"},
+  {id:"uLSEEBGr4Ag",title:"Durga Maa",artist:"Akassh",dur:"3:41"},
+  {id:"W-YAf-bHkCw",title:"Gouri Elo Dekhe Jalo",artist:"DOHAR FOLK",dur:"5:40"},
+  {id:"JOQdF0wRjYY",title:"Dhak Baaja Komor Nacha",artist:"Release",dur:"3:33"},
+  {id:"Ku7mJminJxI",title:"Durge Durge Durgatinashini",artist:"Asha Bhosle",dur:"5:10"},
+  {id:"z-T4qiQMXaw",title:"Rupang Dehi",artist:"Snita Pramanik Ghosh",dur:"4:18"},
+  {id:"1Yycc3tejNw",title:"Aigiri Nandini",artist:"Rajalakshmee Sanjay Official",dur:"15:02"},
+  {id:"nLrpLXaWbxk",title:"Baja Sanai Aar Baja Re Dhol",artist:"Abhijeet Unplugged",dur:"4:44"},
+  {id:"RB_5ED6GIao",title:"Elo Je Maa",artist:"Abhijeet Unplugged",dur:"5:08"},
+  {id:"ZusnukjtotQ",title:"Maa Ashchhe (From \"Maa Ashchhe\")",artist:"Sanjeev Tiwari",dur:"3:27"},
+  {id:"hDve9YmTZq4",title:"Esho Maa Durga",artist:"Shamik Guha Roy",dur:"3:57"},
+  {id:"8z-SSVEj9o8",title:"Maa Go Tui",artist:"Somchanda Bhattacharya",dur:"2:00"},
+  {id:"sto9TBxGibE",title:"Jago Uma",artist:"Rupankar",dur:"5:18"},
+  {id:"mXqUIFUYqpM",title:"Aigiri Nandini (feat. Samarthan, Ramprakash) (Rock Version)",artist:"Sowrabha",dur:"4:57"},
+  {id:"p_hqO0sJh-I",title:"Ailo Uma Barite",artist:"ANTARA NANDY",dur:"3:53"},
+  {id:"UpeueoYgHnE",title:"Aaj Baaje",artist:"Somchanda Bhattacharya",dur:"3:34"},
+  {id:"-vPbyevbN4k",title:"Yoddhar Saathe Ebar Pujo Katan",artist:"Nakash Aziz Official",dur:"3:47"},
+  {id:"9fG229zIL_0",title:"Pujo Pujo Gondho",artist:"Anupam Roy",dur:"2:47"},
+  {id:"E40N8rKKTCc",title:"Pujor Dhaak Theme",artist:"SUROBAIBHAB ( Bibhabendu Bhattacharya Official)",dur:"1:31"},
+  {id:"fpuadv59iYw",title:"Jaago Uma",artist:"Anupam Roy",dur:"5:18"},
+  {id:"srJlx60zfBQ",title:"Pujor Gaan",artist:"Poushali Bhattacharya",dur:"4:45"},
+  {id:"w6SQsKD2U-Y",title:"Aamaar Dugga",artist:"Monali Thakur",dur:"3:20"},
+  {id:"jwMo3vrsL7s",title:"Gouri Elo (From \"Raktabeej\")",artist:"DOHAR FOLK",dur:"3:57"},
+  {id:"nH65Xk8kPjQ",title:"Aham Rudre",artist:"Release",dur:"2:39"},
+  {id:"YNxK-eLJmro",title:"Elo Re Pujo Elo",artist:"Dabbu",dur:"3:13"},
+  {id:"Rx7l8bjzjg4",title:"Chaarpashe Aalo Hok",artist:"Release",dur:"11:34"},
+  {id:"CYcqPK0Dl60",title:"O Thakur",artist:"Upal Sengupta",dur:"2:54"},
+  {id:"PEiFJAy_zsM",title:"Shubho Shubho",artist:"Altamash Faridi",dur:"3:14"},
+  {id:"YnU9c1aj5hY",title:"He Maa Durga Maa",artist:"Aseema Panda",dur:"5:12"},
+  {id:"VNI_XEx7z-g",title:"Durga Maa Eseche",artist:"Akassh",dur:"3:07"},
+  {id:"avySoa5OW1w",title:"Eseche Maa Durga Maa - (DJ Remix)",artist:"Keshab Dey",dur:"3:03"},
+  {id:"hDukD5TJmV4",title:"Kolki",artist:"Monami Ghosh",dur:"4:05"},
+  {id:"LLer3VPOcxg",title:"Dugga Ma Asche",artist:"Infra",dur:"3:34"},
+  {id:"BvIcx9ev8X0",title:"Debi Sajer Gaan",artist:"Rupak Tiary",dur:"3:01"},
+  {id:"ny3oWUnm2Mk",title:"Tomake Chai",artist:"Arijit Singh",dur:"4:14"},
+  {id:"j9_MLElmS9g",title:"Meri Maa Ke Barabar Koi Nahi",artist:"Jubin Nautiyal",dur:"4:59"},
+  {id:"SFJeglBF5cg",title:"Dugga Elo",artist:"Monali Thakur",dur:"2:27"},
+  {id:"cFsCf0MGuuA",title:"Bajlo Tomar Aalor Benu",artist:"Release",dur:"5:16"},
+  {id:"63X0l49OyjI",title:"Durge Durge Durgatinashini",artist:"Release",dur:"3:43"},
+  {id:"_GUdZJQun2I",title:"Madhukaitava Vidhwangsi",artist:"Tushar Dutta",dur:"9:49"},
+  {id:"QvhNGDZhJvE",title:"Kalo Jole Kuchla Tole",artist:"IMAN",dur:"4:23"},
+  {id:"j7nWykTLEMs",title:"Bajlo Tomar Alor Benu",artist:"Sriparna Das",dur:"4:44"},
+  {id:"cFsCf0MGuuA",title:"Bajlo Tomar Aalor Benu",artist:"Release",dur:"5:16"},
+  {id:"DxaNt-pmObM",title:"Bajlo Tomar Aalor Benu With Narration",artist:"Supriti Ghosh",dur:"4:24"},
+  {id:"wLVkrgkoPro",title:"Mahishasura Mardhini",artist:"Release",dur:"5:53"},
+  {id:"6ZCfPaz28_U",title:"Ya Chandi",artist:"Chorus",dur:"1:37"},
+  {id:"YC4ERU01ZxY",title:"Jago Tumi Jago",artist:"Trissha Chatterjee",dur:"2:29"},
+  {id:"Z7kpAzbC66E",title:"Borondala Saaja",artist:"Madhuraa Bhattacharya",dur:"2:41"},
+  {id:"43_oBh4YsQs",title:"Phagun Haoyay Haoyay (From \"Bhalobashar Bari\")",artist:"Jayati Chakraborty",dur:"2:35"},
+  {id:"_RmN29SHVS8",title:"Ogo Amar Agamani-alo",artist:"Sipra Basu",dur:"3:20"},
+  {id:"aNPO5geLn_E",title:"Raai Jago Go",artist:"Pousali Banerjee",dur:"6:00"},
+  {id:"z-T4qiQMXaw",title:"Rupang Dehi",artist:"Snita Pramanik Ghosh",dur:"4:18"},
+  {id:"PRTXLKCV6Nk",title:"ওগো আমার আগমনী আলো",artist:"Samadrita Ghosh",dur:"4:51"},
+  {id:"gbGVjyHq8iA",title:"Durge Durge Durgatinashini",artist:"Asha Bhosle",dur:"5:10"},
+  {id:"ocCQ1UVsel8",title:"Agomonir Gaan",artist:"Anupam Roy",dur:"5:47"},
+  {id:"707QgEnx8Hs",title:"Saajan Rock the Dotara (Folk - Bandish Mix)",artist:"Timir Biswas Studio",dur:"4:28"},
+  {id:"d-NMikRHMQQ",title:"Pujar Gaan (From \"Hooligaanism\")",artist:"Hooligaanism",dur:"6:33"},
+  {id:"WM0waOKjzkE",title:"Asatoma Sadgamaya",artist:"Arijit Singh",dur:"3:07"},
+  {id:"ADpMft-PUb8",title:"Gouri Elo",artist:"Aritra Dasgupta",dur:"5:35"},
+  {id:"S-XOArX0faE",title:"Doob De Re Mon",artist:"Nirmalya Roy",dur:"2:16"},
+  {id:"aJBZvnbS9vM",title:"Apur Paayer Chhaap",artist:"Arijit Singh",dur:"4:06"},
+  {id:"AFOg5wPxduc",title:"Esho Hey",artist:"Release",dur:"5:54"},
+  {id:"jkCWHTt2ml4",title:"Laage Ura Dhura (From \"Toofan\")",artist:"Pritom Hasan",dur:"3:14"},
+  {id:"VUl071_Qw6E",title:"Bholey Baba",artist:"Release",dur:"4:30"},
+  {id:"NwjbjGQXkdU",title:"Dushtu Kokil",artist:"KONA",dur:"3:31"},
+  {id:"G2tTYmSzR6U",title:"Mala Re",artist:"JEET GANNGULI OFFICIAL",dur:"4:08"},
+  {id:"_QpaZZzXCiQ",title:"Koka Kola",artist:"Samidh Mukherjee",dur:"5:00"},
+  {id:"8xtWhxDvq7s",title:"Michhrir Dana",artist:"Shreya Ghoshal Official",dur:"3:34"},
+  {id:"QL6chT20jz8",title:"Desi Chhori",artist:"Release",dur:"3:49"},
+  {id:"IFkARpGk8FA",title:"Party Shoes",artist:"Release",dur:"3:46"},
+  {id:"tMD3VtUyGz8",title:"Bujhina Toh Tai",artist:"Nusraat Faria",dur:"3:05"},
+  {id:"eoLZVAk9t_U",title:"Lady Killer Romeo",artist:"JEET GANNGULI OFFICIAL",dur:"3:47"},
+  {id:"qrCDBZZ_SxM",title:"Police Chorer Preme Porechhe",artist:"Jeet Gannguli",dur:"4:16"},
+  {id:"4vrS8JUUkQA",title:"Baundule Ghuri",artist:"Anupam Roy",dur:"5:44"},
+  {id:"f9FX9_MN-G4",title:"Tumi Jantei Paro Naa",artist:"Mahtim Shakib",dur:"3:45"},
+  {id:"zCj_U2nc_Hk",title:"Taakey Olpo Kachhe Dakchhi",artist:"Mahtim Shakib",dur:"3:15"},
+  {id:"Ev1NLm7Kd4g",title:"Egiye De",artist:"Release",dur:"4:14"},
+  {id:"y6g8eSP0MB0",title:"Shudhu Tomari Jonyo Theme",artist:"Arijit Singh",dur:"3:17"},
+  {id:"9yxSXBjT8jg",title:"Amake Nao",artist:"Debayan Banerjee",dur:"3:10"},
+  {id:"55lHMJ4OnMo",title:"Sajani (From Dilkhush)",artist:"Nilayan Chatterjee",dur:"3:28"},
+  {id:"lan_A5i_JwY",title:"Pheshey Jaai",artist:"Release",dur:"4:11"},
+  {id:"tDolwm2f9g0",title:"Ure Geche",artist:"Ash King",dur:"4:27"},
+  {id:"IXgannYJ9mE",title:"Aashona",artist:"Arijit Singh",dur:"4:04"},
+  {id:"yB5tJlDGQo4",title:"Era Sukher Laagi (From Chokher Bali)",artist:"Release",dur:"2:45"},
+  {id:"4TmNBuJXpns",title:"Tumi Aashe Paashe",artist:"Nakash Aziz Official",dur:"4:22"},
+  {id:"EVPIkFIVHCg",title:"Hey Shokha",artist:"Somlata Acharyya Chowdhury",dur:"4:24"},
+  {id:"VF0T1YLzkEw",title:"Shaajo Shaajao (From \"Ballabhpurer Roopkotha\")",artist:"Release",dur:"4:33"},
+  {id:"RQ1WrgD8vrA",title:"Notun Premer Gaan (From \"Ballabhpurer Roopkotha\")",artist:"Debraj Bhattacharya",dur:"3:50"},
+  {id:"0-rIe6yzwGE",title:"Tumi Emni Emni Esho",artist:"Sanchita Bhowmick",dur:"3:37"},
+  {id:"8NeUGOEpGh0",title:"Maa Go Tui",artist:"Shovan Ganguly Official",dur:"2:00"},
+  {id:"a0ZwJJSlxC8",title:"Khoka Babu",artist:"Rishi",dur:"4:17"},
+  {id:"Bx2avxFHwM0",title:"Pyaar Ka Bukhaar",artist:"Jeet Gannguli",dur:"3:34"},
+  {id:"KqpIIaCJggY",title:"Ankhiyon Ke Jharokhon Se - Classic Romantic Song - Sachin & Ranjeeta - Old Hindi Songs",artist:"Rajshri",dur:"6:45"},
+  {id:"bhG8rZJlsDc",title:"Ashtami Te Tomar Paray",artist:"Chirkut Official",dur:"3:53"}
+];
+
+const DAYS = {
+  mahalaya: {
+    bn:"মহালয়া", en:"Mahalaya", date:"Oct 10", targetDate:"2026-10-10T04:00:00+05:30",
+    tagline:"The Goddess Is Coming",
+    day: {
+      mood:"sacred, nostalgic, early-morning radio",
+      facts:[
+        "Mahalaya marks the start of Devi Paksha — the day Chandi Path airs on All India Radio at 4am, a tradition unbroken since 1931.",
+        "Legend holds this is the day Durga's eyes are painted onto her clay idol — 'Chokkhu Daan' — bringing the murti to life.",
+        "Mahalaya is technically not part of Durga Puja itself. The goddess is formally invoked on Shashti — this day is her invitation."
+      ]
+    },
+    night: {
+      mood:"anticipation, old Kolkata, slightly mysterious",
+      facts:[
+        "The night before Puja begins, Kolkata's streets are silent with anticipation — thousands of artisans put final touches on thousands of idols.",
+        "The tradition of Mahalaya radio broadcast was started by Birendra Krishna Bhadra whose voice became the eternal sound of the season.",
+        "Kumartuli potters in North Kolkata work through the night — the last idol is usually completed just hours before Shashti."
+      ]
+    }
+  },
+  shashti: {
+    bn:"ষষ্ঠী", en:"Shashthi", date:"Oct 16", targetDate:"2026-10-16T06:00:00+05:30",
+    tagline:"She Arrives",
+    day: {
+      mood:"festive, drums, bright morning",
+      facts:[
+        "On Shashti, the goddess is formally welcomed in the Bodhon ritual — a ceremony of awakening where her eyes are unveiled to the world.",
+        "The Kolkata Metro runs through the night during Puja — thousands travel from pandal to pandal till dawn.",
+        "Shashti evening is considered the real start of Puja. Streets transform — lights, food stalls, music, and families dressed in new clothes."
+      ]
+    },
+    night: {
+      mood:"pandal hopping, festive lights, adda",
+      facts:[
+        "Shashti night is famous for 'Anjali at midnight' — some pandals hold special late-night rituals drawing thousands.",
+        "The term 'pandal hopping' is unique to Kolkata Puja culture — people visit 10–20 pandals in a single night, a sport of endurance and devotion.",
+        "Food stalls near pandals serve phuchka, kathi rolls, and jhal muri at 2am — Kolkata eats all night during Puja."
+      ]
+    }
+  },
+  saptami: {
+    bn:"সপ্তমী", en:"Saptami", date:"Oct 17 to 18", targetDate:"2026-10-17T06:00:00+05:30",
+    tagline:"The Grand Arrival",
+    day: {
+      mood:"devotional, morning aarti, new beginnings",
+      facts:[
+        "Saptami begins with Nabapatrika puja — nine plants are bathed at dawn and brought to the pandal wrapped in white sari and red border.",
+        "The Nabapatrika represents nine forms of the goddess, embodying nature, fertility, and abundance.",
+        "Kolkata's Durga idols are traditionally made with clay from the Ganges — and always includes a pinch of soil from a brothel, symbolising that the goddess belongs to all."
+      ]
+    },
+    night: {
+      mood:"warm lights, crowded streets, phuchka and adda",
+      facts:[
+        "Saptami night is often the most crowded — millions throng the streets of Kolkata to see the illuminated pandals.",
+        "The famous Durga Puja of Sreebhoomi Sporting Club is known for recreating entire world landmarks — from temples to airports.",
+        "Sarbojanin means 'for everyone' — Durga Puja is unique in that it is a community celebration open to all, cutting across religion and class."
+      ]
+    }
+  },
+  ashtami: {
+    bn:"অষ্টমী", en:"Ashtami", date:"Oct 19", targetDate:"2026-10-19T06:00:00+05:30",
+    tagline:"The Peak — Pushpanjali",
+    day: {
+      mood:"reverent, flower offerings, incense, peak energy",
+      facts:[
+        "Ashtami is the most sacred day — Pushpanjali (flower offering) happens at dawn, when thousands chant 'Jai Maa Durga' in unison at every pandal.",
+        "Sandhi Puja falls between Ashtami and Nabami — a 48-minute window that is considered the most auspicious moment of all of Durga Puja.",
+        "During Sandhi Puja, 108 lamps are lit and 108 lotuses are offered — symbolising the 108 names of the goddess."
+      ]
+    },
+    night: {
+      mood:"dhunuchi naach, aarti bells, majestic",
+      facts:[
+        "Ashtami night draws the largest crowds — Bagbazar and Kumartuli pandals see queues stretching kilometres.",
+        "Dhunuchi naach — dancing with burning coconut shell incense — is a uniquely Bengali tradition performed to the beat of the dhak drum.",
+        "The biggest Durga Puja budgets run into crores — some pandals have sets built by national award-winning film art directors."
+      ]
+    }
+  },
+  nabami: {
+    bn:"নবমী", en:"Navami", date:"Oct 20", targetDate:"2026-10-20T06:00:00+05:30",
+    tagline:"The Last Full Night",
+    day: {
+      mood:"bittersweet joy, last chances, sunlight",
+      facts:[
+        "Nabami is the last full day. There's a collective sadness — people stay up all night knowing the goddess leaves tomorrow.",
+        "The saying goes: 'Durga Puja asche' is the best phrase in Bengali, and 'Durga Puja chole gelo' the most painful.",
+        "Many pandals hold cultural programmes — music, dance, theatre — through the night of Nabami to stretch the celebration as long as possible."
+      ]
+    },
+    night: {
+      mood:"nostalgia, final night, tears and laughter",
+      facts:[
+        "Nabami night is the longest queue night — dedicated Puja-goers visit 30+ pandals, walking through dawn.",
+        "By Nabami night, some smaller pandals begin dismantling their decorations — a visible reminder that it is ending.",
+        "Bengalis abroad stream Puja live from Kolkata on Nabami night, sharing in the bittersweet last hours."
+      ]
+    }
+  },
+  dashami: {
+    bn:"দশমী", en:"Dashami", date:"Oct 21", targetDate:"2026-10-21T06:00:00+05:30",
+    tagline:"Goodbye, Ma",
+    day: {
+      mood:"emotional farewell, sindoor, procession",
+      facts:[
+        "On Dashami, married women play Sindoor Khela — applying vermilion to the goddess and each other, bidding farewell.",
+        "The immersion procession (Bisorjon) carries the idol to the Ganges — the moment of immersion often brings tears to those watching.",
+        "After Bisorjon, Kolkatans begin counting days to next year's Puja. 'Abar ashbe tumi, Maa' — you will come again, Mother."
+      ]
+    },
+    night: {
+      mood:"melancholy, reflection, the year ahead",
+      facts:[
+        "After Bisorjon, the streets empty within hours — the contrast with the festivity of the past five days is the most Bengali experience there is.",
+        "The clay from Durga's idol returns to the Ganges, completing a cycle — earth to goddess to earth.",
+        "Asche bochor abar hobe — it will happen again next year. This promise keeps every Bengali's heart going through the other 360 days."
+      ]
+    }
+  }
+};
+
+
+/* ═══════════════════════════════════════════════════════
+   APP STATE
+═══════════════════════════════════════════════════════ */
+let currentDay = "mahalaya";
+let isNight = false;
+let currentCat = "classic";
+let currentList = [];
+let currentIndex = -1;
+let playingId = null;
+let npExpanded = false;
+
+let ytPlayer = null, ytReady = false;
+let pendingId = null, pendingAutoplay = false;
+let progressTimer = null, lastDur = 0;
+let errorSkips = 0;
+
+let factIdx = 0, factTimer = null;
+
+/* ═══════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════ */
+function init() {
+  checkFileProtocol();
+  initYouTube();
+  initDhak();
+  buildDayPills();
+
+  // Restore saved day and night mode across page reloads
+  let initialDay = "mahalaya";
+  let initialNight = false;
+  try {
+    if (window.location.hash) {
+      const h = window.location.hash.replace('#', '').toLowerCase();
+      if (DAYS[h]) initialDay = h;
+    } else {
+      const savedDay = localStorage.getItem("durga_pujo_saved_day");
+      if (savedDay && DAYS[savedDay]) initialDay = savedDay;
+    }
+    const savedMode = localStorage.getItem("durga_pujo_saved_mode");
+    if (savedMode === "night") initialNight = true;
+    else if (savedMode === "day") initialNight = false;
+  } catch(e) {}
+
+  setDayNightMode(initialNight, false);
+  switchDay(initialDay);
+  startCountdown();
+  buildQueue();
+  wireButtons();
+}
+
+/* ═══════════════════════════════════════════════════════
+   DAY PILLS
+═══════════════════════════════════════════════════════ */
+function buildDayPills() {
+  const sel = document.getElementById("daySelector");
+  DAYS_ORDER.forEach(d => {
+    const info = DAYS[d];
+    const pill = document.createElement("button");
+    pill.className = "day-pill" + (d === currentDay ? " active" : "");
+    pill.dataset.day = d;
+    pill.innerHTML = `<span class="bn">${info.bn}</span><span class="en">${info.en}</span><span class="dt">${info.date}</span>`;
+    pill.addEventListener("click", () => switchDay(d));
+    sel.appendChild(pill);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   SWITCH DAY
+═══════════════════════════════════════════════════════ */
+function switchDay(day) {
+  currentDay = day;
+  try {
+    localStorage.setItem("durga_pujo_saved_day", day);
+  } catch(e) {}
+  // pills
+  document.querySelectorAll(".day-pill").forEach(p => p.classList.toggle("active", p.dataset.day === day));
+  // heading
+  const info = DAYS[day];
+  if (info) {
+    const modeData = isNight ? info.night : info.day;
+    const titleEl = document.getElementById("dayTitle");
+    const taglineEl = document.getElementById("dayTagline");
+    const copyEl = document.getElementById("moodCopy");
+    if (titleEl) titleEl.textContent = info.bn;
+    if (taglineEl) taglineEl.textContent = info.tagline;
+    if (copyEl && modeData) copyEl.textContent = modeData.mood;
+  }
+  // countdown for this specific day
+  updateCountdown(day);
+  // background
+  updateBackground();
+  // facts
+  clearInterval(factTimer);
+  factIdx = 0;
+  const factsList = getCurrentFacts();
+  renderFact(factsList);
+  if (factsList.length > 1) {
+    factTimer = setInterval(() => {
+      factIdx = (factIdx + 1) % factsList.length;
+      renderFact(factsList);
+    }, 9000);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   PHOTO MANIFESTS (MAHALAYA & ASHTAMI MULTI-PHOTO SUPPORT)
+═══════════════════════════════════════════════════════ */
+const MAHALAYA_DAY_PHOTOS = [
+  {
+    url: "./images/devdutta_kumartuli_durga_trinayana.jpg",
+    credit: "Devdutta Roy",
+    pos: "center center",
+    fit: "contain",
+    glow: "radial-gradient(ellipse at 50% 45%, rgba(245, 185, 75, 0.35) 0%, rgba(190, 105, 30, 0.17) 46%, rgba(10, 4, 2, 0) 72%)",
+    glowColor: "rgba(245, 180, 70, 0.28)"
+  },
+  {
+    url: "./images/devdutta_kumartuli_clay_durga.jpg",
+    credit: "Devdutta Roy",
+    pos: "center center",
+    fit: "contain",
+    glow: "radial-gradient(ellipse at 50% 48%, rgba(240, 170, 65, 0.34) 0%, rgba(180, 95, 25, 0.16) 46%, rgba(10, 4, 2, 0) 72%)",
+    glowColor: "rgba(240, 170, 65, 0.26)"
+  },
+  {
+    url: "./images/devdutta_kumartuli_artisan_palette.jpg",
+    credit: "Devdutta Roy",
+    pos: "center center",
+    fit: "contain",
+    glow: "radial-gradient(ellipse at 50% 50%, rgba(245, 175, 60, 0.33) 0%, rgba(185, 100, 25, 0.16) 46%, rgba(10, 4, 2, 0) 72%)",
+    glowColor: "rgba(245, 175, 60, 0.25)"
+  }
+];
+
+const MAHALAYA_NIGHT_PHOTOS = [
+  {
+    url: "./images/devdutta_kumartuli_workshop_idols.jpg",
+    credit: "Devdutta Roy",
+    pos: "center center",
+    fit: "contain",
+    glow: "radial-gradient(ellipse at 50% 48%, rgba(255, 170, 50, 0.36) 0%, rgba(195, 80, 20, 0.18) 46%, rgba(10, 4, 2, 0) 72%)",
+    glowColor: "rgba(255, 170, 50, 0.28)"
+  },
+  {
+    url: "./images/mahalaya_night_pandal_construction.jpg",
+    credit: "AI Generated",
+    pos: "center center",
+    fit: "contain",
+    glow: "radial-gradient(ellipse at 50% 50%, rgba(255, 180, 65, 0.35) 0%, rgba(190, 85, 25, 0.18) 48%, rgba(10, 4, 2, 0) 74%)",
+    glowColor: "rgba(255, 180, 65, 0.28)"
+  },
+  {
+    url: "./images/devdutta_kumartuli_artisan_studio.jpg",
+    credit: "Devdutta Roy",
+    pos: "center center",
+    fit: "contain",
+    glow: "radial-gradient(ellipse at 50% 50%, rgba(250, 165, 45, 0.34) 0%, rgba(185, 75, 20, 0.17) 46%, rgba(10, 4, 2, 0) 72%)",
+    glowColor: "rgba(250, 165, 45, 0.26)"
+  }
+];
+
+const ASHTAMI_NIGHT_PHOTOS = [
+  {
+    url: "./images/sagnik_ashtami_night_durga_pradip.jpg",
+    credit: "Sagnik Paul",
+    pos: "center center",
+    fit: "contain",
+    glow: "radial-gradient(ellipse at 50% 50%, rgba(245, 175, 55, 0.38) 0%, rgba(200, 95, 20, 0.18) 45%, rgba(10, 4, 2, 0) 72%)",
+    glowColor: "rgba(245, 175, 55, 0.30)"
+  },
+  {
+    url: "./images/sagnik_ashtami_night_108_pradip.jpg",
+    credit: "Sagnik Paul",
+    pos: "center center",
+    fit: "contain",
+    glow: "radial-gradient(ellipse at 50% 52%, rgba(255, 160, 45, 0.40) 0%, rgba(210, 75, 15, 0.20) 48%, rgba(10, 4, 2, 0) 74%)",
+    glowColor: "rgba(255, 160, 45, 0.32)"
+  }
+];
+
+let slideshowTimer = null;
+let currentSlideIdx = 0;
+let currentSlideshowKey = null; // e.g. 'mahalaya-day', 'ashtami-night'
+let activePhotoLayer = "A";
+let photoCrossfadeSeq = 0;
+
+function normalizeCredit(credit) {
+  if (!credit) return null;
+  const c = credit.trim().toLowerCase();
+  if (c.includes("devdutta")) return "Devdutta Roy";
+  if (c.includes("sagnik")) return "Sagnik Paul";
+  if (c.includes("richik")) return "Richik Bhattacharya";
+  if (c.includes("ai")) return "AI Generated";
+  return credit;
+}
+
+function setPhotoCredit(credit) {
+  credit = normalizeCredit(credit);
+  const creditEl = document.getElementById("photoCredit");
+  if (!creditEl) return;
+  if (credit) {
+    creditEl.innerHTML = `📸 Photo: <span class="credit-name">${credit}</span>`;
+    creditEl.style.display = "inline-flex";
+  } else {
+    creditEl.style.display = "none";
+  }
+}
+
+function setPhotoCrossfade(url, credit, immediate = false, pos = "center center", fit = "contain", glow = null, glowColor = null) {
+  const seq = ++photoCrossfadeSeq;
+  const curLayer = activePhotoLayer;
+  const nextLayer = activePhotoLayer === "A" ? "B" : "A";
+  const curImg = document.getElementById("bgPhoto" + curLayer);
+  const nextImg = document.getElementById("bgPhoto" + nextLayer);
+  const curAmb = document.getElementById("bgAmbient" + curLayer);
+  const nextAmb = document.getElementById("bgAmbient" + nextLayer);
+  const curGlow = document.getElementById("bgGlow" + curLayer);
+  const nextGlow = document.getElementById("bgGlow" + nextLayer);
+
+  // Clear pending handlers from both images to avoid stale crossfade/credit callbacks
+  if (curImg) { curImg.onload = null; curImg.onerror = null; }
+  if (nextImg) { nextImg.onload = null; nextImg.onerror = null; }
+
+  if (!url) {
+    setPhotoCredit(null);
+    if (curImg) { curImg.classList.remove("active"); curImg.style.opacity = "0"; }
+    if (nextImg) { nextImg.classList.remove("active"); nextImg.style.opacity = "0"; }
+    if (curAmb) { curAmb.classList.remove("active"); curAmb.style.opacity = "0"; }
+    if (nextAmb) { nextAmb.classList.remove("active"); nextAmb.style.opacity = "0"; }
+    if (curGlow) { curGlow.classList.remove("active"); curGlow.style.opacity = "0"; }
+    if (nextGlow) { nextGlow.classList.remove("active"); nextGlow.style.opacity = "0"; }
+    return;
+  }
+
+  const targetPos = pos || "center center";
+  const isContain = fit === "contain";
+
+  const applyToLayer = (imgEl, ambEl, glowEl) => {
+    if (imgEl) {
+      imgEl.src = url;
+      imgEl.style.objectPosition = targetPos;
+      if (isContain) {
+        imgEl.classList.add("fit-contain");
+        if (glowColor) {
+          imgEl.style.setProperty("--photo-glow-color", glowColor);
+        } else {
+          imgEl.style.removeProperty("--photo-glow-color");
+        }
+      } else {
+        imgEl.classList.remove("fit-contain");
+        imgEl.style.removeProperty("--photo-glow-color");
+      }
+    }
+    if (ambEl) {
+      ambEl.src = url;
+    }
+    if (glowEl) {
+      if (glow) {
+        glowEl.style.background = glow;
+      } else {
+        glowEl.style.background = "none";
+      }
+    }
+  };
+
+  if (immediate) {
+    setPhotoCredit(credit);
+    applyToLayer(curImg, curAmb, curGlow);
+    if (curImg) { curImg.classList.add("active"); curImg.style.opacity = "1"; }
+    if (curAmb) { curAmb.classList.add("active"); curAmb.style.opacity = "0.88"; }
+    if (curGlow) {
+      if (glow) { curGlow.classList.add("active"); curGlow.style.opacity = "0.85"; }
+      else { curGlow.classList.remove("active"); curGlow.style.opacity = "0"; }
+    }
+    if (nextImg) { nextImg.classList.remove("active"); nextImg.style.opacity = "0"; }
+    if (nextAmb) { nextAmb.classList.remove("active"); nextAmb.style.opacity = "0"; }
+    if (nextGlow) { nextGlow.classList.remove("active"); nextGlow.style.opacity = "0"; }
+    return;
+  }
+
+  applyToLayer(nextImg, nextAmb, nextGlow);
+
+  const applyCrossfade = () => {
+    // Stale check: discard if a newer crossfade call was triggered
+    if (seq !== photoCrossfadeSeq) return;
+    if (nextImg) {
+      nextImg.classList.add("active");
+      nextImg.style.opacity = "1";
+    }
+    if (nextAmb) {
+      nextAmb.classList.add("active");
+      nextAmb.style.opacity = "0.88";
+    }
+    if (nextGlow) {
+      if (glow) { nextGlow.classList.add("active"); nextGlow.style.opacity = "0.85"; }
+      else { nextGlow.classList.remove("active"); nextGlow.style.opacity = "0"; }
+    }
+    if (curImg) {
+      curImg.classList.remove("active");
+      curImg.style.opacity = "0";
+    }
+    if (curAmb) {
+      curAmb.classList.remove("active");
+      curAmb.style.opacity = "0";
+    }
+    if (curGlow) {
+      curGlow.classList.remove("active");
+      curGlow.style.opacity = "0";
+    }
+    activePhotoLayer = nextLayer;
+    setPhotoCredit(credit);
+  };
+
+  if (nextImg && nextImg.complete) {
+    applyCrossfade();
+  } else if (nextImg) {
+    nextImg.onload = applyCrossfade;
+    nextImg.onerror = applyCrossfade;
+  }
+}
+
+function getActivePhotoList() {
+  if (currentDay === "mahalaya") {
+    return isNight ? MAHALAYA_NIGHT_PHOTOS : MAHALAYA_DAY_PHOTOS;
+  }
+  if (currentDay === "ashtami" && isNight) {
+    return ASHTAMI_NIGHT_PHOTOS;
+  }
+  const slot = isNight ? "night" : "day";
+  const photoData = PHOTOS[currentDay] && PHOTOS[currentDay][slot];
+  if (photoData && photoData.url) {
+    return [photoData];
+  }
+  return [];
+}
+
+function startPhotoSlideshow(key, photos, immediate = false) {
+  if (slideshowTimer) {
+    clearInterval(slideshowTimer);
+    slideshowTimer = null;
+  }
+  currentSlideshowKey = key;
+  currentSlideIdx = 0;
+  if (!photos || photos.length === 0) return;
+
+  const initial = photos[0];
+  setPhotoCrossfade(initial.url, initial.credit, immediate, initial.pos, initial.fit, initial.glow, initial.glowColor);
+
+  if (photos.length > 1) {
+    slideshowTimer = setInterval(() => {
+      const activeList = getActivePhotoList();
+      if (activeList.length <= 1) {
+        stopSlideshow();
+        return;
+      }
+      currentSlideIdx = (currentSlideIdx + 1) % activeList.length;
+      const nextItem = activeList[currentSlideIdx];
+      setPhotoCrossfade(nextItem.url, nextItem.credit, false, nextItem.pos, nextItem.fit, nextItem.glow, nextItem.glowColor);
+    }, 7500);
+  }
+}
+
+function stopSlideshow() {
+  if (slideshowTimer) {
+    clearInterval(slideshowTimer);
+    slideshowTimer = null;
+  }
+  currentSlideshowKey = null;
+}
+
+function updateBackground() {
+  const targetKey = `${currentDay}-${isNight ? "night" : "day"}`;
+  const photos = getActivePhotoList();
+
+  if (photos.length > 1) {
+    if (currentSlideshowKey !== targetKey || !slideshowTimer) {
+      startPhotoSlideshow(targetKey, photos, false);
+    }
+  } else if (photos.length === 1) {
+    stopSlideshow();
+    currentSlideshowKey = targetKey;
+    const p = photos[0];
+    setPhotoCrossfade(p.url, p.credit, false, p.pos || "center center", p.fit || "contain", p.glow || null, p.glowColor || null);
+  } else {
+    stopSlideshow();
+    setPhotoCrossfade(null, null, false);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   DAY / NIGHT TOGGLE
+═══════════════════════════════════════════════════════ */
+function getCurrentFacts() {
+  const info = DAYS[currentDay];
+  if (!info) return [];
+  const modeData = isNight ? info.night : info.day;
+  if (modeData && Array.isArray(modeData.facts) && modeData.facts.length > 0) {
+    return modeData.facts;
+  }
+  return info.facts || [];
+}
+
+function setDayNightMode(nightMode, save = true) {
+  isNight = !!nightMode;
+  const icon = document.getElementById("dayNightIcon");
+  const label = document.getElementById("dayNightLabel");
+  const btn = document.getElementById("dayNightBtn");
+  if (icon) icon.textContent = isNight ? "🌙" : "☀️";
+  if (label) label.textContent = isNight ? "Night" : "Day";
+  if (btn) btn.classList.toggle("on", isNight);
+  if (save) {
+    try {
+      localStorage.setItem("durga_pujo_saved_mode", isNight ? "night" : "day");
+    } catch(e) {}
+  }
+}
+
+function toggleDayNight() {
+  setDayNightMode(!isNight, true);
+  // reapply day data
+  const info = DAYS[currentDay];
+  const modeData = isNight ? info.night : info.day;
+  document.getElementById("moodCopy").textContent = modeData.mood;
+  clearInterval(factTimer);
+  factIdx = 0;
+  const factsList = getCurrentFacts();
+  renderFact(factsList);
+  if (factsList.length > 1) {
+    factTimer = setInterval(() => {
+      factIdx = (factIdx + 1) % factsList.length;
+      renderFact(factsList);
+    }, 9000);
+  }
+  updateBackground();
+  buildQueue();
+}
+
+/* ═══════════════════════════════════════════════════════
+   FACTS
+═══════════════════════════════════════════════════════ */
+function renderFact(facts) {
+  const dots = document.getElementById("fbDots");
+  const txt = document.getElementById("fbText");
+  if (!dots || !txt) return;
+  dots.innerHTML = "";
+  if (!facts || !facts.length) {
+    txt.textContent = "";
+    return;
+  }
+  facts.forEach((_, i) => {
+    const d = document.createElement("div");
+    d.className = "fb-dot" + (i === factIdx ? " active" : "");
+    dots.appendChild(d);
+  });
+  txt.classList.add("fading");
+  setTimeout(() => {
+    txt.textContent = facts[factIdx] || facts[0] || "";
+    txt.classList.remove("fading");
+  }, 220);
+}
+document.getElementById("factBanner").addEventListener("click", () => {
+  const factsList = getCurrentFacts();
+  if (!factsList.length) return;
+  factIdx = (factIdx + 1) % factsList.length;
+  clearInterval(factTimer);
+  renderFact(factsList);
+  if (factsList.length > 1) {
+    factTimer = setInterval(() => {
+      factIdx = (factIdx + 1) % factsList.length;
+      renderFact(factsList);
+    }, 9000);
+  }
+});
+
+/* ═══════════════════════════════════════════════════════
+   DEVIPAKSHA-STYLE PUJA RADIO PLAYER & DHAK ENGINE
+═══════════════════════════════════════════════════════ */
+let isShuffle = false;
+let isRepeat = false;
+let dhakAudio = null;
+let isDhakPlaying = false;
+let dhakFadeTimer = null;
+let isPlaylistModalOpen = false;
+
+function initDhak() {
+  if (dhakAudio) return;
+  try {
+    dhakAudio = new Audio('audio/dhak.mp3');
+    dhakAudio.preload = 'auto';
+    dhakAudio.loop = false; // Automatically completes cycle and turns off
+
+    // Natural smooth volume fade-down in the last 1.2s of the audio track
+    dhakAudio.addEventListener('timeupdate', () => {
+      if (!isDhakPlaying || !dhakAudio) return;
+      const dur = dhakAudio.duration;
+      const cur = dhakAudio.currentTime;
+      if (dur && cur && (dur - cur) <= 1.2) {
+        const remaining = Math.max(0, dur - cur);
+        dhakAudio.volume = Math.max(0, Math.min(1, remaining / 1.2));
+      }
+    });
+
+    // Auto toggle-off when track completes
+    dhakAudio.addEventListener('ended', () => {
+      isDhakPlaying = false;
+      updateDhakUI();
+      dhakAudio.currentTime = 0;
+      dhakAudio.volume = 1;
+    });
+
+    dhakAudio.addEventListener('error', (e) => {
+      console.warn('Dhak audio file error:', e);
+      isDhakPlaying = false;
+      updateDhakUI();
+    });
+  } catch(e) {
+    console.warn('Dhak audio init error:', e);
+  }
+}
+
+function stopDhakWithFade(fadeDurationMs = 650) {
+  if (!dhakAudio) return;
+  isDhakPlaying = false;
+  updateDhakUI();
+
+  if (dhakFadeTimer) {
+    clearInterval(dhakFadeTimer);
+    dhakFadeTimer = null;
+  }
+
+  const startVol = dhakAudio.volume;
+  if (startVol <= 0.02 || dhakAudio.paused) {
+    dhakAudio.pause();
+    dhakAudio.currentTime = 0;
+    dhakAudio.volume = 1;
+    return;
+  }
+
+  const steps = 20;
+  const stepInterval = Math.max(15, Math.floor(fadeDurationMs / steps));
+  const volDecrement = startVol / steps;
+
+  dhakFadeTimer = setInterval(() => {
+    if (!dhakAudio) {
+      clearInterval(dhakFadeTimer);
+      dhakFadeTimer = null;
+      return;
+    }
+    if (dhakAudio.volume > volDecrement) {
+      dhakAudio.volume = Math.max(0, dhakAudio.volume - volDecrement);
+    } else {
+      clearInterval(dhakFadeTimer);
+      dhakFadeTimer = null;
+      dhakAudio.pause();
+      dhakAudio.currentTime = 0;
+      dhakAudio.volume = 1;
+    }
+  }, stepInterval);
+}
+
+function toggleDhak() {
+  initDhak();
+  if (!dhakAudio) return;
+
+  if (isDhakPlaying) {
+    // Graceful smooth fade-out and auto toggle off
+    stopDhakWithFade(650);
+  } else {
+    // Clear any active fade and reset audio cleanly
+    if (dhakFadeTimer) {
+      clearInterval(dhakFadeTimer);
+      dhakFadeTimer = null;
+    }
+    dhakAudio.pause();
+    dhakAudio.currentTime = 0;
+    dhakAudio.volume = 1;
+
+    const playPromise = dhakAudio.play();
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        isDhakPlaying = true;
+        updateDhakUI();
+      }).catch(err => {
+        console.warn('Dhak play error:', err);
+        isDhakPlaying = false;
+        updateDhakUI();
+      });
+    } else {
+      isDhakPlaying = true;
+      updateDhakUI();
+    }
+  }
+}
+
+function updateDhakUI() {
+  const btns = [document.getElementById('dpDhakBtn'), document.getElementById('dpMobDhakBtn')];
+  btns.forEach(btn => {
+    if (btn) {
+      btn.classList.toggle('active', isDhakPlaying);
+      btn.setAttribute('aria-pressed', isDhakPlaying ? 'true' : 'false');
+    }
+  });
+}
+
+function openPlaylistModal() {
+  const modal = document.getElementById('dpPlaylistModal');
+  const btn = document.getElementById('dpPlaylistBtn');
+  if (!modal) return;
+  isPlaylistModalOpen = true;
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  if (btn) btn.classList.add('open');
+  const subEl = document.getElementById('dpModalSub');
+  if (subEl && currentList) {
+    subEl.textContent = `${currentList.length} Tracks • Durga Puja Playlist`;
+  }
+  renderModalQueue();
+  setTimeout(() => {
+    const activeRow = modal.querySelector('.dp-track-row.active');
+    if (activeRow) {
+      activeRow.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+  }, 100);
+}
+
+function closePlaylistModal() {
+  const modal = document.getElementById('dpPlaylistModal');
+  const btn = document.getElementById('dpPlaylistBtn');
+  if (!modal) return;
+  isPlaylistModalOpen = false;
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+  if (btn) btn.classList.remove('open');
+}
+
+function togglePlaylistModal() {
+  if (isPlaylistModalOpen) closePlaylistModal();
+  else openPlaylistModal();
+}
+
+function toggleShuffle() {
+  isShuffle = !isShuffle;
+  const btns = [document.getElementById('dpShuffleBtn'), document.getElementById('dpMobShuffleBtn')];
+  btns.forEach(b => { if (b) b.classList.toggle('active', isShuffle); });
+  showToast(isShuffle ? "Shuffle On" : "Shuffle Off");
+}
+
+function toggleRepeat() {
+  isRepeat = !isRepeat;
+  const btns = [document.getElementById('dpRepeatBtn'), document.getElementById('dpMobRepeatBtn')];
+  btns.forEach(b => { if (b) b.classList.toggle('active', isRepeat); });
+  showToast(isRepeat ? "Repeat On" : "Repeat Off");
+}
+
+function formatDuration(sec) {
+  if (!sec || isNaN(sec) || sec < 0) return "0:00";
+  const s = Math.floor(sec);
+  const m = Math.floor(s / 60);
+  const rem = s % 60;
+  return `${m}:${rem < 10 ? '0' : ''}${rem}`;
+}
+
+function buildQueue() {
+  currentList = PUJA_RADIO_TRACKS;
+  let targetIdx = 0;
+  let shouldPlay = false;
+
+  try {
+    const savedTrackId = localStorage.getItem("durga_pujo_saved_track_id");
+    if (savedTrackId) {
+      const foundIdx = currentList.findIndex(t => t.id === savedTrackId);
+      if (foundIdx !== -1) {
+        targetIdx = foundIdx;
+        shouldPlay = true;
+      }
+    }
+  } catch(e) {}
+
+  if (playingId) {
+    const idx = currentList.findIndex(t => t.id === playingId);
+    currentIndex = (idx !== -1) ? idx : 0;
+    renderPlayerUI(currentIndex);
+  } else {
+    if (currentList.length > 0) {
+      if (shouldPlay) {
+        selectAndPlay(targetIdx);
+      } else {
+        selectTrack(targetIdx);
+      }
+    } else {
+      currentIndex = -1;
+    }
+  }
+}
+
+function renderModalQueue(query = "") {
+  const container = document.getElementById('dpModalTracklist');
+  if (!container) return;
+  container.innerHTML = "";
+  const q = (query || "").trim().toLowerCase();
+  
+  currentList.forEach((t, i) => {
+    if (q) {
+      const matches = t.title.toLowerCase().includes(q) || t.artist.toLowerCase().includes(q);
+      if (!matches) return;
+    }
+    const row = document.createElement('div');
+    row.className = 'dp-track-row' + (i === currentIndex ? ' active' : '');
+    row.innerHTML = `
+      <span class="dp-row-num">${i === currentIndex ? '♪' : String(i + 1).padStart(2, '0')}</span>
+      <div class="dp-row-thumb">
+        <img src="https://img.youtube.com/vi/${t.id}/mqdefault.jpg" alt="" loading="lazy" onerror="this.src='images/sagnik_ashtami_night_durga_pradip.jpg'"/>
+      </div>
+      <div class="dp-row-meta">
+        <div class="dp-row-title">${t.title}</div>
+        <div class="dp-row-artist">${t.artist}</div>
+      </div>
+      <span class="dp-row-dur">${t.dur || ''}</span>
+    `;
+    row.addEventListener('click', () => {
+      selectAndPlay(i);
+      renderModalQueue(q);
+    });
+    container.appendChild(row);
+  });
+}
+
+function renderPlayerUI(idx) {
+  if (idx < 0 || idx >= currentList.length) return;
+  const t = currentList[idx];
+  const titleEl = document.getElementById('dpTitle');
+  const artistEl = document.getElementById('dpArtist');
+  const artImg = document.getElementById('dpArtImg');
+  const durEl = document.getElementById('dpDuration');
+  if (titleEl) titleEl.textContent = t.title;
+  if (artistEl) artistEl.textContent = t.artist;
+  if (durEl) durEl.textContent = t.dur || "3:00";
+  if (artImg) {
+    artImg.src = `https://img.youtube.com/vi/${t.id}/mqdefault.jpg`;
+  }
+  const rows = document.querySelectorAll('#dpModalTracklist .dp-track-row');
+  rows.forEach((r, i) => {
+    r.classList.toggle('active', i === idx);
+    const numEl = r.querySelector('.dp-row-num');
+    if (numEl) {
+      numEl.textContent = (i === idx) ? "♪" : String(i + 1).padStart(2, '0');
+    }
+  });
+}
+
+function selectAndPlay(idx) {
+  if (idx < 0 || idx >= currentList.length) return;
+  currentIndex = idx;
+  const track = currentList[idx];
+  playingId = track.id;
+  try {
+    localStorage.setItem("durga_pujo_saved_track_id", track.id);
+  } catch(e) {}
+  renderPlayerUI(idx);
+  setPlayBtns("⏸");
+  loadYT(track.id, true);
+  resetProgress();
+}
+
+function selectTrack(idx) {
+  if (idx < 0 || idx >= currentList.length) return;
+  currentIndex = idx;
+  const track = currentList[idx];
+  playingId = track.id;
+  try {
+    localStorage.setItem("durga_pujo_saved_track_id", track.id);
+  } catch(e) {}
+  renderPlayerUI(idx);
+  setPlayBtns("▶");
+  loadYT(track.id, false);
+  resetProgress();
+}
+
+function setPlayBtns(state) {
+  const playIcon = document.getElementById('dpPlayIcon');
+  const pauseIcon = document.getElementById('dpPauseIcon');
+  const card = document.getElementById('dpPlayerCard');
+  const isPlaying = (state === "⏸");
+  if (playIcon) playIcon.style.display = isPlaying ? "none" : "block";
+  if (pauseIcon) pauseIcon.style.display = isPlaying ? "block" : "none";
+  if (card) card.classList.toggle('is-playing', isPlaying);
+}
+
+function togglePlayPause() {
+  if (!playingId && currentList.length > 0) {
+    selectAndPlay(0);
+    return;
+  }
+  if (!ytReady || !ytPlayer || !ytPlayer.getPlayerState) {
+    if (playingId) loadYT(playingId, true);
+    return;
+  }
+  try {
+    if (ytPlayer.unMute) ytPlayer.unMute();
+    if (ytPlayer.setVolume) ytPlayer.setVolume(100);
+    const state = ytPlayer.getPlayerState();
+    if (state === YT.PlayerState.PLAYING) {
+      ytPlayer.pauseVideo();
+    } else {
+      ytPlayer.playVideo();
+    }
+  } catch(err) {
+    console.warn("togglePlayPause error:", err);
+    if (currentIndex !== -1) selectAndPlay(currentIndex);
+    else if (currentList.length > 0) selectAndPlay(0);
+  }
+}
+
+function nextTrack() {
+  if (!currentList.length) return;
+  if (isShuffle) {
+    let nextIdx;
+    do {
+      nextIdx = Math.floor(Math.random() * currentList.length);
+    } while (nextIdx === currentIndex && currentList.length > 1);
+    selectAndPlay(nextIdx);
+  } else {
+    const nextIdx = (currentIndex + 1) % currentList.length;
+    selectAndPlay(nextIdx);
+  }
+}
+
+function prevTrack() {
+  if (!currentList.length) return;
+  try {
+    if (ytPlayer && ytPlayer.getCurrentTime && ytPlayer.getCurrentTime() > 3) {
+      ytPlayer.seekTo(0, true);
+      return;
+    }
+  } catch(e) {}
+  const prevIdx = (currentIndex - 1 + currentList.length) % currentList.length;
+  selectAndPlay(prevIdx);
+}
+
+function startProgress() {
+  stopProgress();
+  progressTimer = setInterval(() => {
+    if (!ytReady || !ytPlayer || !ytPlayer.getCurrentTime) return;
+    try {
+      const cur = ytPlayer.getCurrentTime() || 0;
+      const dur = ytPlayer.getDuration() || 0;
+      const curEl = document.getElementById('dpCurrentTime');
+      const durEl = document.getElementById('dpDuration');
+      const fillEl = document.getElementById('dpProgressFill');
+      if (curEl) curEl.textContent = formatDuration(cur);
+      if (dur && dur > 0) {
+        if (durEl) durEl.textContent = formatDuration(dur);
+        if (fillEl) fillEl.style.width = Math.min(100, (cur / dur) * 100) + "%";
+      }
+    } catch(e) {}
+  }, 250);
+}
+
+function stopProgress() {
+  if (progressTimer) {
+    clearInterval(progressTimer);
+    progressTimer = null;
+  }
+}
+
+function resetProgress() {
+  stopProgress();
+  const curEl = document.getElementById('dpCurrentTime');
+  const fillEl = document.getElementById('dpProgressFill');
+  if (curEl) curEl.textContent = "0:00";
+  if (fillEl) fillEl.style.width = "0%";
+}
+
+/* ═══════════════════════════════════════════════════════
+   COUNTDOWN
+═══════════════════════════════════════════════════════ */
+let countdownTimer = null;
+
+function updateCountdown(dayKey) {
+  if (countdownTimer) {
+    clearInterval(countdownTimer);
+    countdownTimer = null;
+  }
+  const info = DAYS[dayKey];
+  if (!info || !info.targetDate) return;
+  const target = new Date(info.targetDate).getTime();
+  const labelEl = document.getElementById("cdLabel");
+  const unitsEl = document.getElementById("cdUnits");
+  const dEl = document.getElementById("cdD");
+  const hEl = document.getElementById("cdH");
+  const mEl = document.getElementById("cdM");
+  const sEl = document.getElementById("cdS");
+
+  function tick() {
+    const diff = target - Date.now();
+    if (diff <= 0) {
+      if (labelEl) labelEl.textContent = `🪔 ${info.bn} এসে গেছে — ${info.en} is here!`;
+      if (unitsEl) unitsEl.style.display = "none";
+      return;
+    }
+    if (labelEl) labelEl.textContent = `${info.en} arrives in`;
+    if (unitsEl) unitsEl.style.display = "";
+
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    if (dEl) dEl.textContent = d;
+    if (hEl) hEl.textContent = String(h).padStart(2, "0");
+    if (mEl) mEl.textContent = String(m).padStart(2, "0");
+    if (sEl) sEl.textContent = String(s).padStart(2, "0");
+  }
+
+  tick();
+  countdownTimer = setInterval(tick, 1000);
+}
+
+function startCountdown() {
+  updateCountdown(currentDay || "mahalaya");
+}
+
+/* ═══════════════════════════════════════════════════════
+   YOUTUBE AUDIO ENGINE
+═══════════════════════════════════════════════════════ */
+function checkFileProtocol() {
+  if (window.location.protocol === "file:") {
+    const banner = document.getElementById("fileProtocolBanner");
+    if (banner) banner.style.display = "block";
+  }
+}
+
+function initYouTube() {
+  if (ytPlayer) return;
+  if (window.YT && window.YT.Player) {
+    onYouTubeIframeAPIReady();
+  } else {
+    window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
+    let attempts = 0;
+    const checkTimer = setInterval(() => {
+      attempts++;
+      if (ytPlayer || attempts > 50) {
+        clearInterval(checkTimer);
+        return;
+      }
+      if (window.YT && window.YT.Player) {
+        clearInterval(checkTimer);
+        if (!ytPlayer) onYouTubeIframeAPIReady();
+      }
+    }, 150);
+  }
+}
+
+function onYouTubeIframeAPIReady() {
+  if (ytPlayer) return;
+  const currentOrigin = (window.location.protocol === "http:" || window.location.protocol === "https:")
+    ? window.location.origin
+    : "http://localhost:3000";
+
+  ytPlayer = new YT.Player("ytPlayerHost", {
+    height: "160",
+    width: "240",
+    playerVars: {
+      autoplay: 0,
+      controls: 0,
+      disablekb: 1,
+      modestbranding: 1,
+      rel: 0,
+      playsinline: 1,
+      enablejsapi: 1,
+      origin: currentOrigin
+    },
+    events: {
+      onReady: onPlayerReady,
+      onStateChange: onPlayerStateChange,
+      onError: onPlayerError
+    }
+  });
+}
+
+window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
+
+function onPlayerReady() {
+  ytReady = true;
+  try {
+    if (ytPlayer.unMute) ytPlayer.unMute();
+    if (ytPlayer.setVolume) ytPlayer.setVolume(100);
+    if (ytPlayer.setPlaybackQuality) ytPlayer.setPlaybackQuality("tiny");
+  } catch(e) {}
+  if (pendingId) {
+    if (pendingAutoplay) {
+      try {
+        ytPlayer.loadVideoById(pendingId);
+        ytPlayer.playVideo();
+      } catch(e) {
+        ytPlayer.loadVideoById(pendingId);
+      }
+    } else {
+      ytPlayer.cueVideoById(pendingId);
+    }
+    pendingId = null;
+  }
+}
+
+function loadYT(id, autoplay) {
+  if (!ytReady || !ytPlayer || !ytPlayer.loadVideoById) {
+    pendingId = id;
+    pendingAutoplay = autoplay;
+    initYouTube();
+    return;
+  }
+  try {
+    if (ytPlayer.unMute) ytPlayer.unMute();
+    if (ytPlayer.setVolume) ytPlayer.setVolume(100);
+    if (ytPlayer.setPlaybackQuality) ytPlayer.setPlaybackQuality("tiny");
+    if (autoplay) {
+      ytPlayer.loadVideoById(id);
+      try { ytPlayer.playVideo(); } catch(e) {}
+    } else {
+      ytPlayer.cueVideoById(id);
+    }
+  } catch(e) {
+    console.error("loadYT error:", e);
+  }
+}
+
+function onPlayerStateChange(e) {
+  if (e.data === YT.PlayerState.PLAYING) {
+    errorSkips = 0;
+    setPlayBtns("⏸");
+    startProgress();
+  } else if (e.data === YT.PlayerState.PAUSED) {
+    setPlayBtns("▶");
+    stopProgress();
+  } else if (e.data === YT.PlayerState.ENDED) {
+    stopProgress();
+    if (isRepeat) {
+      selectAndPlay(currentIndex);
+    } else {
+      nextTrack();
+    }
+  }
+}
+
+function onPlayerError(e) {
+  const code = e && e.data ? e.data : "unknown";
+  console.warn("YouTube player error:", code, "Track ID:", playingId);
+  errorSkips++;
+  showToast("Audio unavailable on this track, playing next…");
+  if (errorSkips > 5) {
+    showToast("Several tracks restricted. Try selecting another song.");
+    return;
+  }
+  setTimeout(() => nextTrack(), 600);
+}
+
+function showToast(msg) {
+  let toast = document.getElementById("playerToast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "playerToast";
+    toast.className = "player-toast";
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.classList.add("show");
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => toast.classList.remove("show"), 3000);
+}
+
+/* ═══════════════════════════════════════════════════════
+   FULLSCREEN
+═══════════════════════════════════════════════════════ */
+document.getElementById("fsBtn").addEventListener("click", () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+  } else {
+    document.exitFullscreen && document.exitFullscreen();
+  }
+});
+
+/* ═══════════════════════════════════════════════════════
+   WIRE BUTTONS
+═══════════════════════════════════════════════════════ */
+
+function safeOn(id, event, handler) {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener(event, handler);
+}
+
+function wireButtons() {
+  safeOn("dayNightBtn", "click", toggleDayNight);
+  safeOn("dpPlaylistBtn", "click", togglePlaylistModal);
+  safeOn("dpModalCloseBtn", "click", closePlaylistModal);
+
+  // Close modal when clicking on backdrop
+  const modal = document.getElementById("dpPlaylistModal");
+  if (modal) {
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closePlaylistModal();
+    });
+  }
+
+  // Escape key closes modal
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && isPlaylistModalOpen) {
+      closePlaylistModal();
+    }
+  });
+
+  // Modal search
+  const searchInput = document.getElementById("dpSearchInput");
+  const searchClear = document.getElementById("dpSearchClear");
+  if (searchInput) {
+    searchInput.addEventListener("input", (e) => {
+      const val = e.target.value;
+      if (searchClear) searchClear.style.display = val ? "inline-block" : "none";
+      renderModalQueue(val);
+    });
+  }
+  if (searchClear) {
+    searchClear.addEventListener("click", () => {
+      if (searchInput) {
+        searchInput.value = "";
+        searchInput.focus();
+      }
+      searchClear.style.display = "none";
+      renderModalQueue("");
+    });
+  }
+
+  safeOn("dpDhakBtn", "click", toggleDhak);
+  safeOn("dpMobDhakBtn", "click", toggleDhak);
+
+  safeOn("dpPlayBtn", "click", togglePlayPause);
+  safeOn("dpArtWrap", "click", togglePlayPause);
+  safeOn("dpNextBtn", "click", nextTrack);
+  safeOn("dpPrevBtn", "click", prevTrack);
+
+  safeOn("dpShuffleBtn", "click", toggleShuffle);
+  safeOn("dpMobShuffleBtn", "click", toggleShuffle);
+  safeOn("dpRepeatBtn", "click", toggleRepeat);
+  safeOn("dpMobRepeatBtn", "click", toggleRepeat);
+
+  const bar = document.getElementById("dpProgressBar");
+  if (bar) {
+    bar.addEventListener("click", (e) => {
+      if (!ytPlayer || !ytPlayer.getDuration) return;
+      const rect = bar.getBoundingClientRect();
+      const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      const dur = ytPlayer.getDuration() || 0;
+      if (dur > 0) {
+        ytPlayer.seekTo(pos * dur, true);
+        const fill = document.getElementById("dpProgressFill");
+        if (fill) fill.style.width = (pos * 100) + "%";
+      }
+    });
+  }
+}
+
+/* ── Start ── */
+init();
+</script>
+</body>
+</html>

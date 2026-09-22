@@ -1290,7 +1290,6 @@ const PUJA_RADIO_TRACKS = [
   {id:"BvIcx9ev8X0",title:"Debi Sajer Gaan",artist:"Rupak Tiary",dur:"3:01"},
   {id:"ny3oWUnm2Mk",title:"Tomake Chai",artist:"Arijit Singh",dur:"4:14"},
   {id:"j9_MLElmS9g",title:"Meri Maa Ke Barabar Koi Nahi",artist:"Jubin Nautiyal",dur:"4:59"},
-  {id:"SFJeglBF5cg",title:"Dugga Elo",artist:"Monali Thakur",dur:"2:27"},
   {id:"cFsCf0MGuuA",title:"Bajlo Tomar Aalor Benu",artist:"Release",dur:"5:16"},
   {id:"63X0l49OyjI",title:"Durge Durge Durgatinashini",artist:"Release",dur:"3:43"},
   {id:"_GUdZJQun2I",title:"Madhukaitava Vidhwangsi",artist:"Tushar Dutta",dur:"9:49"},
@@ -2139,15 +2138,14 @@ function formatDuration(sec) {
 function buildQueue() {
   currentList = PUJA_RADIO_TRACKS;
   let targetIdx = 0;
-  let shouldPlay = false;
 
+  // Restore last played track if available, otherwise default to Monali Thakur - Dugga Elo (index 0)
   try {
     const savedTrackId = localStorage.getItem("durga_pujo_saved_track_id");
     if (savedTrackId) {
       const foundIdx = currentList.findIndex(t => t.id === savedTrackId);
       if (foundIdx !== -1) {
         targetIdx = foundIdx;
-        shouldPlay = true;
       }
     }
   } catch(e) {}
@@ -2158,11 +2156,8 @@ function buildQueue() {
     renderPlayerUI(currentIndex);
   } else {
     if (currentList.length > 0) {
-      if (shouldPlay) {
-        selectAndPlay(targetIdx);
-      } else {
-        selectTrack(targetIdx);
-      }
+      // Cue and display the track in paused state — NEVER autoplay on site open or refresh
+      selectTrack(targetIdx);
     } else {
       currentIndex = -1;
     }
@@ -2244,9 +2239,6 @@ function selectTrack(idx) {
   currentIndex = idx;
   const track = currentList[idx];
   playingId = track.id;
-  try {
-    localStorage.setItem("durga_pujo_saved_track_id", track.id);
-  } catch(e) {}
   renderPlayerUI(idx);
   setPlayBtns("▶");
   loadYT(track.id, false);
@@ -2278,9 +2270,17 @@ function togglePlayPause() {
     const state = ytPlayer.getPlayerState();
     if (state === YT.PlayerState.PLAYING) {
       ytPlayer.pauseVideo();
-    } else {
+    } else if (state === YT.PlayerState.PAUSED) {
       try { stopDhakWithFade(350); } catch(e) {}
       ytPlayer.playVideo();
+    } else {
+      // Cued (5), unstarted (-1), ended (0)
+      if (currentIndex !== -1 && currentList[currentIndex]) {
+        selectAndPlay(currentIndex);
+      } else {
+        try { stopDhakWithFade(350); } catch(e) {}
+        ytPlayer.playVideo();
+      }
     }
   } catch(err) {
     console.warn("togglePlayPause error:", err);

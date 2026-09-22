@@ -7,10 +7,18 @@
 <title>দেবীপক্ষ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" href="https://www.youtube.com/iframe_api" as="script">
 <link rel="preconnect" href="https://www.youtube.com">
+<link rel="preconnect" href="https://www.youtube-nocookie.com">
+<link rel="preconnect" href="https://googlevideo.com">
 <link rel="preconnect" href="https://i.ytimg.com">
 <link rel="preconnect" href="https://s.ytimg.com">
+<link rel="preconnect" href="https://static.doubleclick.net">
+<link rel="dns-prefetch" href="https://googlevideo.com">
+<link rel="dns-prefetch" href="https://www.youtube.com">
+<link rel="dns-prefetch" href="https://www.youtube-nocookie.com">
 <link rel="dns-prefetch" href="https://www.google.com">
+<script src="https://www.youtube.com/iframe_api" async></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪔</text></svg>">
 <style>
@@ -1091,9 +1099,8 @@
 
 
 
-<div id="ytPlayerHost" style="position:fixed; width:240px; height:160px; right:0; bottom:0; opacity:0.001; pointer-events:none; z-index:-1;"></div>
+<div id="ytPlayerHost" style="position:fixed; width:200px; height:200px; right:0; bottom:0; opacity:0.001; pointer-events:none; z-index:-1;"></div>
 
-<script src="https://www.youtube.com/iframe_api"></script>
 <script>
 /* ═══════════════════════════════════════════════════════
    PHOTO MANIFEST
@@ -2206,6 +2213,7 @@ function renderPlayerUI(idx) {
 
 function selectAndPlay(idx) {
   if (idx < 0 || idx >= currentList.length) return;
+  try { stopDhakWithFade(350); } catch(e) {}
   currentIndex = idx;
   const track = currentList[idx];
   playingId = track.id;
@@ -2258,6 +2266,7 @@ function togglePlayPause() {
     if (state === YT.PlayerState.PLAYING) {
       ytPlayer.pauseVideo();
     } else {
+      try { stopDhakWithFade(350); } catch(e) {}
       ytPlayer.playVideo();
     }
   } catch(err) {
@@ -2413,12 +2422,14 @@ function onYouTubeIframeAPIReady() {
     : "http://localhost:3000";
 
   ytPlayer = new YT.Player("ytPlayerHost", {
-    height: "160",
-    width: "240",
+    height: "200",
+    width: "200",
     playerVars: {
-      autoplay: 0,
+      autoplay: 1,
       controls: 0,
       disablekb: 1,
+      fs: 0,
+      iv_load_policy: 3,
       modestbranding: 1,
       rel: 0,
       playsinline: 1,
@@ -2440,20 +2451,32 @@ function onPlayerReady() {
   try {
     if (ytPlayer.unMute) ytPlayer.unMute();
     if (ytPlayer.setVolume) ytPlayer.setVolume(100);
-    if (ytPlayer.setPlaybackQuality) ytPlayer.setPlaybackQuality("tiny");
   } catch(e) {}
   if (pendingId) {
     if (pendingAutoplay) {
       try {
-        ytPlayer.loadVideoById(pendingId);
-        ytPlayer.playVideo();
+        ytPlayer.loadVideoById({ videoId: pendingId, suggestedQuality: 'small' });
       } catch(e) {
         ytPlayer.loadVideoById(pendingId);
       }
     } else {
-      ytPlayer.cueVideoById(pendingId);
+      try {
+        ytPlayer.cueVideoById({ videoId: pendingId, suggestedQuality: 'small' });
+      } catch(e) {
+        ytPlayer.cueVideoById(pendingId);
+      }
     }
     pendingId = null;
+  } else {
+    // Pre-warm the player with current / initial track for instant start
+    const primeTrack = (currentIndex >= 0 && currentList[currentIndex])
+      ? currentList[currentIndex].id
+      : (currentList[0] ? currentList[0].id : null);
+    if (primeTrack) {
+      try {
+        ytPlayer.cueVideoById({ videoId: primeTrack, suggestedQuality: 'small' });
+      } catch(e) {}
+    }
   }
 }
 
@@ -2467,15 +2490,23 @@ function loadYT(id, autoplay) {
   try {
     if (ytPlayer.unMute) ytPlayer.unMute();
     if (ytPlayer.setVolume) ytPlayer.setVolume(100);
-    if (ytPlayer.setPlaybackQuality) ytPlayer.setPlaybackQuality("tiny");
     if (autoplay) {
-      ytPlayer.loadVideoById(id);
-      try { ytPlayer.playVideo(); } catch(e) {}
+      ytPlayer.loadVideoById({
+        videoId: id,
+        suggestedQuality: 'small'
+      });
     } else {
-      ytPlayer.cueVideoById(id);
+      ytPlayer.cueVideoById({
+        videoId: id,
+        suggestedQuality: 'small'
+      });
     }
   } catch(e) {
     console.error("loadYT error:", e);
+    try {
+      if (autoplay) ytPlayer.loadVideoById(id);
+      else ytPlayer.cueVideoById(id);
+    } catch(err) {}
   }
 }
 

@@ -98,35 +98,30 @@
     object-position: center center !important;
   }
   .photo-credit {
-    position: fixed; bottom: 84px; right: 18px; z-index: 85;
-    background: rgba(14, 4, 6, 0.84);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(232, 182, 75, 0.4);
+    background: rgba(0, 0, 0, 0.42);
+    border: 1px solid rgba(232, 182, 75, 0.3);
     color: var(--cream);
-    padding: 6px 14px;
+    padding: 6px 12px;
+    min-height: 36px;
     border-radius: 999px;
-    font-size: 11.5px;
+    font-size: 11px;
     font-weight: 600;
-    letter-spacing: .4px;
-    box-shadow: 0 4px 18px rgba(0,0,0,0.65);
+    letter-spacing: .3px;
     display: none;
     align-items: center;
-    gap: 6px;
-    pointer-events: auto;
-    transition: opacity .4s ease, transform .3s ease;
+    gap: 5px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: opacity .3s ease;
+    user-select: none;
+    white-space: nowrap;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .photo-credit .credit-name {
     color: var(--gold-bright);
     font-weight: 700;
-  }
-  @media (max-width: 600px) {
-    .photo-credit {
-      bottom: 74px;
-      right: 12px;
-      font-size: 10.5px;
-      padding: 4px 10px;
-    }
   }
   .grain {
     position: absolute; inset: -50%; width: 200%; height: 200%; pointer-events: none;
@@ -1001,16 +996,20 @@
       display: none; /* Hidden on mobile to keep Maa Durga's face 100% visible */
     }
 
-    /* Photo credit positioned cleanly above the bottom dock */
+    /* Photo credit inside topbar-right: static header pill, never overlapping */
     .photo-credit {
-      bottom: calc(150px + env(safe-area-inset-bottom));
-      right: 12px;
+      position: static !important;
+      bottom: auto !important;
+      right: auto !important;
+      padding: 5px 9px;
+      min-height: 32px;
       font-size: 10px;
-      padding: 3px 10px;
-      max-width: 75vw;
+      max-width: 110px;
+      gap: 4px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      box-shadow: none;
     }
 
     /* Bottom Docked Main Container */
@@ -1033,47 +1032,9 @@
       pointer-events: auto;
     }
 
-    /* Fact Banner: compact glass pill at the bottom */
+    /* Fact Banner: completely hidden on mobile so it never covers the screen */
     .fact-banner {
-      position: relative;
-      margin: 0 auto 1px;
-      width: 100%;
-      padding: 6px 14px;
-      border-radius: 999px;
-      background: rgba(14, 6, 4, 0.58);
-      border: 1px solid rgba(232, 182, 75, 0.22);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 7px;
-      min-height: unset;
-      box-shadow: 0 4px 18px rgba(0,0,0,0.45);
-    }
-    .fb-head {
-      margin-bottom: 0;
-      padding-bottom: 0;
-      border-bottom: none;
-      gap: 4px;
-      flex-shrink: 0;
-    }
-    .fb-title {
-      font-size: 8.5px;
-      letter-spacing: 0.8px;
-      white-space: nowrap;
-    }
-    .fb-dots {
-      display: none;
-    }
-    .fb-text {
-      font-size: 11px;
-      line-height: 1.25;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      color: var(--cream);
-      opacity: 0.92;
+      display: none !important;
     }
 
     /* Pills row */
@@ -1259,14 +1220,10 @@
       padding: 0 8px calc(10px + env(safe-area-inset-bottom));
       gap: 5px;
     }
-    .fact-banner {
-      padding: 5px 10px;
-    }
-    .fb-title {
-      font-size: 8px;
-    }
-    .fb-text {
-      font-size: 10px;
+    .photo-credit {
+      max-width: 85px;
+      padding: 4px 7px;
+      font-size: 9px;
     }
     .dp-player-card {
       padding: 8px 10px;
@@ -1411,9 +1368,6 @@
   <div class="grade"></div>
   <div class="heritage-warmth"></div>
 </div>
-<div class="photo-credit" id="photoCredit" style="display: inline-flex;">
-  📸 Photo: <span class="credit-name">Devdutta Roy</span>
-</div>
 
 <!-- ── Protocol banner for file:// ── -->
 <div id="fileProtocolBanner" class="file-banner">
@@ -1430,6 +1384,9 @@
     <span class="brand-sub">DEVI PAKSHA</span>
   </div>
   <div class="topbar-right">
+    <div class="photo-credit" id="photoCredit" style="display: inline-flex;" title="Photographer Credit">
+      📸 <span class="credit-name">Devdutta Roy</span>
+    </div>
     <button class="toggle-btn" id="dayNightBtn" type="button" aria-label="Toggle Day and Night mode">
       <span id="dayNightIcon">☀️</span><span id="dayNightLabel">Day</span>
     </button>
@@ -2140,7 +2097,8 @@ function setPhotoCredit(credit) {
   const creditEl = document.getElementById("photoCredit");
   if (!creditEl) return;
   if (credit) {
-    creditEl.innerHTML = `📸 Photo: <span class="credit-name">${credit}</span>`;
+    creditEl.innerHTML = `📸 <span class="credit-name">${credit}</span>`;
+    creditEl.title = `Photo: ${credit}`;
     creditEl.style.display = "inline-flex";
   } else {
     creditEl.style.display = "none";

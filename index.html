@@ -159,7 +159,7 @@
   /* ── Top bar ── */
   .topbar {
     position: relative; z-index: 6;
-    display: flex; justify-content: flex-end; align-items: center;
+    display: flex; justify-content: space-between; align-items: center;
     padding: 13px 18px; gap: 10px;
   }
   .brand {
@@ -330,29 +330,15 @@
   }
   .fb-text.fading { opacity: 0; }
 
-  @media (min-width: 900px) {
+  @media (min-width: 769px) {
     .fact-banner {
-      position: absolute;
+      position: fixed;
       top: 56px;
       right: clamp(16px, 2.5vw, 36px);
       width: clamp(260px, 22vw, 315px);
       min-height: 84px;
       height: auto;
-    }
-  }
-
-  @media (max-width: 899px) {
-    main {
-      margin: 12px auto 0;
-      max-width: 580px;
-    }
-    .fact-banner {
-      position: relative;
-      margin: 10px auto 4px;
-      width: calc(100% - 32px);
-      max-width: 520px;
-      min-height: unset;
-      aspect-ratio: auto;
+      z-index: 10;
     }
   }
 
@@ -927,128 +913,204 @@
      RESPONSIVE DESIGN BREAKPOINTS
      ═══════════════════════════════════════════════════════ */
 
-  /* ── Tablets & Intermediate Screens (<= 768px) ── */
+  /* ── Mobile & Tablet Screens (<= 768px) ── */
   @media (max-width: 768px) {
-    .photo-credit {
-      bottom: 70px;
-      right: 14px;
-      font-size: 11px;
-      padding: 5px 12px;
-      max-width: 85vw;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    /* Full-bleed background artwork on mobile */
+    .photo,
+    .photo.fit-contain {
+      object-fit: cover !important;
+      object-position: center 25% !important;
+      padding: 0 !important;
+      filter: drop-shadow(0 0 45px rgba(0, 0, 0, 0.95)) saturate(1.04) contrast(1.02) brightness(0.96) !important;
     }
-    .dp-modal-dialog {
-      max-width: 90vw;
-      height: 84vh;
-    }
-  }
 
-  /* ── Mobile Phones (<= 600px) ── */
-  @media (max-width: 600px) {
+    /* Top bar */
     .topbar {
-      padding: 10px 14px;
+      padding: 9px 14px;
       gap: 8px;
+    }
+    .brand {
+      font-size: 14px;
+      gap: 5px;
+    }
+    .brand-sub {
+      font-size: 9px;
+      letter-spacing: .4px;
+    }
+    .topbar-right {
+      gap: 6px;
+    }
+    .toggle-btn {
+      padding: 6px 12px;
+      min-height: 32px;
+      font-size: 11px;
+      gap: 5px;
     }
     .icon-btn {
       width: 32px;
       height: 32px;
-      font-size: 13px;
+      font-size: 12.5px;
     }
+
+    /* Countdown */
     .countdown-strip {
-      padding: 4px 12px 0;
+      padding: 3px 12px 0;
       gap: 6px;
-      font-size: 10.5px;
+      font-size: 10px;
     }
     .cd-unit {
-      padding: 2.5px 6px;
+      padding: 2px 6px;
       border-radius: 6px;
-      font-size: 10.5px;
+      font-size: 10px;
     }
     .cd-unit span {
-      font-size: 8px;
+      font-size: 7.5px;
     }
+
+    /* Day selector horizontal scroll */
     .day-selector {
-      padding: 6px 12px 8px;
+      padding: 4px 12px 6px;
       gap: 6px;
       scroll-padding: 0 12px;
     }
     .day-pill {
-      padding: 7px 13px;
-      min-height: 36px;
-      font-size: 11.5px;
+      padding: 6px 12px;
+      min-height: 34px;
+      font-size: 11px;
     }
-    .day-pill .bn { font-size: 12px; }
-    .day-pill .en { font-size: 8px; }
-    .day-pill .dt { font-size: 8px; }
-    .controls-row {
-      padding: 0 12px 6px;
-      gap: 7px;
-    }
-    .toggle-btn {
-      padding: 7px 14px;
-      min-height: 36px;
-      font-size: 11.5px;
-    }
+    .day-pill .bn { font-size: 11.5px; }
+    .day-pill .en { font-size: 7.5px; }
+    .day-pill .dt { font-size: 7.5px; }
+
+    /* Mood heading: ethereal, unobtrusive overlay */
     .mood-heading-row {
-      margin: 4px auto 2px;
-      padding: 0 12px;
+      margin: 3px auto 0;
+      padding: 0 14px;
     }
     .mood-heading-row h1 {
-      font-size: clamp(1.7rem, 6.5vw, 2.4rem);
+      font-size: clamp(1.6rem, 5.8vw, 2.1rem);
+      line-height: 1.12;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.9), 0 4px 20px rgba(0,0,0,0.7);
     }
     .mood-tagline {
-      font-size: clamp(0.92rem, 3vw, 1.12rem);
-      margin-top: 2px;
+      font-size: clamp(0.85rem, 2.6vw, 1.02rem);
+      margin-top: 1px;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.9);
     }
     .mood-copy {
-      font-size: 11px;
-      margin-top: 4px;
-      line-height: 1.45;
-      padding: 0 6px;
+      display: none; /* Hidden on mobile to keep Maa Durga's face 100% visible */
     }
+
+    /* Photo credit positioned cleanly above the bottom dock */
+    .photo-credit {
+      bottom: calc(150px + env(safe-area-inset-bottom));
+      right: 12px;
+      font-size: 10px;
+      padding: 3px 10px;
+      max-width: 75vw;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Bottom Docked Main Container */
+    main {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 50;
+      margin: 0 auto;
+      padding: 0 12px calc(10px + env(safe-area-inset-bottom));
+      max-width: 520px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      pointer-events: none;
+    }
+    main > * {
+      pointer-events: auto;
+    }
+
+    /* Fact Banner: compact glass pill at the bottom */
     .fact-banner {
-      margin: 8px auto 4px;
-      width: calc(100% - 24px);
-      padding: 9px 12px 10px;
-      border-radius: 14px;
+      position: relative;
+      margin: 0 auto 1px;
+      width: 100%;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(14, 6, 4, 0.58);
+      border: 1px solid rgba(232, 182, 75, 0.22);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 7px;
+      min-height: unset;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.45);
+    }
+    .fb-head {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+      gap: 4px;
+      flex-shrink: 0;
     }
     .fb-title {
       font-size: 8.5px;
-      letter-spacing: 1.2px;
+      letter-spacing: 0.8px;
+      white-space: nowrap;
+    }
+    .fb-dots {
+      display: none;
     }
     .fb-text {
       font-size: 11px;
-      line-height: 1.45;
+      line-height: 1.25;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--cream);
+      opacity: 0.92;
     }
-    main {
-      padding: 0 12px calc(14px + env(safe-area-inset-bottom));
-      margin: 10px auto 0;
-    }
+
+    /* Pills row */
     .dp-pills-row {
-      margin-bottom: 8px;
+      margin-bottom: 0;
       gap: 8px;
     }
     .dp-pill-btn, .dp-dhak-btn {
-      padding: 6px 13px;
+      padding: 6px 14px;
       font-size: 10.5px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
     }
+
+    /* Floating Player Card */
     .dp-player-card {
-      padding: 12px 14px;
+      background: rgba(14, 7, 5, 0.74);
+      border: 1px solid rgba(255, 255, 255, 0.15);
       border-radius: 20px;
-      margin-bottom: 10px;
+      padding: 10px 14px;
+      backdrop-filter: blur(24px) saturate(150%);
+      -webkit-backdrop-filter: blur(24px) saturate(150%);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55), 0 0 20px rgba(232, 182, 75, 0.08);
+      margin-bottom: 0;
     }
     .dp-card-main {
-      gap: 11px;
+      gap: 10px;
     }
     .dp-art-wrap {
-      width: 58px;
-      height: 58px;
-      border-radius: 12px;
+      width: 52px;
+      height: 52px;
+      border-radius: 11px;
     }
     .dp-track-title {
-      font-size: 13px;
+      font-size: 12.5px;
     }
     .dp-track-artist {
       font-size: 10.5px;
@@ -1079,16 +1141,17 @@
     }
     .dp-mobile-toolbar {
       display: grid;
-      margin-top: 8px;
-      padding-top: 7px;
+      margin-top: 7px;
+      padding-top: 6px;
+      gap: 4px;
     }
     .dp-mob-btn {
-      font-size: 10.5px;
-      padding: 5px 4px;
-      gap: 5px;
+      font-size: 10px;
+      padding: 4px;
+      gap: 4px;
     }
 
-    /* Modal bottom sheet on mobile */
+    /* Modal bottom-sheet */
     .dp-playlist-modal-backdrop {
       padding: 0;
       align-items: flex-end;
@@ -1096,8 +1159,8 @@
     .dp-modal-dialog {
       width: 100%;
       max-width: 100%;
-      height: 86vh;
-      max-height: 88vh;
+      height: 84vh;
+      max-height: 86vh;
       border-radius: 22px 22px 0 0;
       border-bottom: none;
       border-left: none;
@@ -1167,195 +1230,162 @@
     }
   }
 
-  /* ── Compact Phones (<= 400px) ── */
-  @media (max-width: 400px) {
+  /* ── Compact Phones (<= 380px) ── */
+  @media (max-width: 380px) {
     .topbar {
-      padding: 8px 10px;
+      padding: 7px 10px;
+    }
+    .brand-sub {
+      display: none;
     }
     .day-selector {
-      padding: 5px 8px 6px;
-      gap: 5px;
+      padding: 3px 8px 5px;
+      gap: 4px;
       scroll-padding: 0 8px;
     }
-    .day-pill {
-      padding: 6px 11px;
-      min-height: 34px;
-    }
-    .mood-heading-row h1 {
-      font-size: 1.6rem;
-    }
-    .mood-tagline {
-      font-size: 0.88rem;
-    }
-    main {
-      padding: 0 10px calc(12px + env(safe-area-inset-bottom));
-      margin: 8px auto 0;
-    }
-    .dp-player-card {
-      padding: 10px 11px;
-      border-radius: 18px;
-      margin-bottom: 8px;
-    }
-    .dp-card-main {
-      gap: 9px;
-    }
-    .dp-art-wrap {
-      width: 50px;
-      height: 50px;
-      border-radius: 10px;
-    }
-    .dp-track-title {
-      font-size: 12px;
-    }
-    .dp-track-artist {
-      font-size: 10px;
-    }
-    .dp-controls {
-      gap: 2px;
-    }
-    .dp-ctrl-btn {
-      width: 28px;
-      height: 28px;
-    }
-    .dp-ctrl-btn svg {
-      width: 14px;
-      height: 14px;
-    }
-    .dp-play-btn {
-      width: 33px;
-      height: 33px;
-      border-radius: 9px;
-    }
-    .dp-play-btn svg {
-      width: 15px;
-      height: 15px;
-    }
-    .dp-mobile-toolbar {
-      margin-top: 6px;
-      padding-top: 5px;
-    }
-    .dp-mob-btn {
-      font-size: 10px;
-      padding: 4px 2px;
-    }
-    .dp-track-row {
-      padding: 6px 8px;
-      gap: 8px;
-    }
-    .dp-row-thumb {
-      width: 34px;
-      height: 34px;
-      border-radius: 7px;
-    }
-    .dp-row-num {
-      width: 16px;
-      font-size: 9.5px;
-    }
-    .dp-row-title {
-      font-size: 12px;
-    }
-    .dp-row-artist {
-      font-size: 10px;
-    }
-  }
-
-  /* ── Ultra-Compact Phones (<= 340px) ── */
-  @media (max-width: 340px) {
     .day-pill {
       padding: 5px 9px;
       min-height: 32px;
     }
     .day-pill .bn { font-size: 11px; }
-    .day-pill .en { font-size: 7.5px; }
+    .day-pill .en { font-size: 7px; }
+    .mood-heading-row h1 {
+      font-size: 1.45rem;
+    }
+    .mood-tagline {
+      font-size: 0.82rem;
+    }
+    main {
+      padding: 0 8px calc(10px + env(safe-area-inset-bottom));
+      gap: 5px;
+    }
+    .fact-banner {
+      padding: 5px 10px;
+    }
+    .fb-title {
+      font-size: 8px;
+    }
+    .fb-text {
+      font-size: 10px;
+    }
+    .dp-player-card {
+      padding: 8px 10px;
+      border-radius: 16px;
+    }
+    .dp-card-main {
+      gap: 8px;
+    }
     .dp-art-wrap {
       width: 44px;
       height: 44px;
-      border-radius: 8px;
-    }
-    .dp-card-main {
-      gap: 7px;
+      border-radius: 9px;
     }
     .dp-track-title {
       font-size: 11.5px;
     }
+    .dp-track-artist {
+      font-size: 9.5px;
+    }
+    .dp-controls {
+      gap: 2px;
+    }
     .dp-ctrl-btn {
-      width: 25px;
-      height: 25px;
+      width: 27px;
+      height: 27px;
     }
     .dp-ctrl-btn svg {
       width: 13px;
       height: 13px;
     }
     .dp-play-btn {
-      width: 30px;
-      height: 30px;
-      border-radius: 8px;
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+    }
+    .dp-play-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+    .dp-track-row {
+      padding: 6px 8px;
+      gap: 7px;
     }
     .dp-row-thumb {
-      width: 30px;
-      height: 30px;
+      width: 32px;
+      height: 32px;
+    }
+    .dp-row-num {
+      width: 15px;
+      font-size: 9px;
     }
   }
 
   /* ── Landscape / Short Viewports (<= 520px height) ── */
   @media (max-height: 520px) {
+    .photo,
+    .photo.fit-contain {
+      object-fit: cover !important;
+      object-position: center 30% !important;
+      padding: 0 !important;
+    }
     .topbar {
-      padding: 5px 14px;
+      padding: 4px 12px;
     }
     .countdown-strip {
-      padding: 2px 14px 0;
-      font-size: 9.5px;
+      padding: 1px 12px 0;
+      font-size: 9px;
     }
     .day-selector {
-      padding: 3px 14px 5px;
+      padding: 2px 12px 3px;
     }
     .day-pill {
-      padding: 4px 10px;
-      min-height: 30px;
-    }
-    .controls-row {
-      padding: 0 14px 4px;
-    }
-    .toggle-btn {
-      padding: 4px 12px;
-      min-height: 28px;
-      font-size: 11px;
+      padding: 3px 8px;
+      min-height: 26px;
     }
     .mood-heading-row {
-      margin: 2px auto 1px;
+      margin: 1px auto 0;
     }
     .mood-heading-row h1 {
-      font-size: 1.45rem;
+      font-size: 1.25rem;
     }
     .mood-tagline {
-      font-size: 0.85rem;
+      font-size: 0.78rem;
     }
     .mood-copy {
       display: none;
     }
-    .fact-banner {
-      margin: 4px auto 2px;
-      padding: 6px 12px;
+    .photo-credit {
+      display: none;
     }
     main {
-      margin: 4px auto 0;
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 0 10px 4px;
       gap: 4px;
+      max-width: 600px;
+    }
+    .fact-banner {
+      display: none;
     }
     .dp-pills-row {
-      margin-bottom: 4px;
-      gap: 6px;
-    }
-    .dp-pill-btn, .dp-dhak-btn {
-      padding: 4px 10px;
-      font-size: 9.5px;
+      display: none;
     }
     .dp-player-card {
-      padding: 8px 12px;
-      margin-bottom: 6px;
+      padding: 6px 10px;
+      border-radius: 14px;
     }
     .dp-art-wrap {
-      width: 44px;
-      height: 44px;
+      width: 38px;
+      height: 38px;
+    }
+    .dp-mobile-toolbar {
+      display: none;
+    }
+    .dp-controls #dpShuffleBtn,
+    .dp-controls #dpRepeatBtn {
+      display: flex;
     }
     .dp-modal-dialog {
       height: 94vh;
@@ -1395,8 +1425,15 @@
 
 <!-- ── Top Bar ── -->
 <div class="topbar">
+  <div class="brand">
+    <span>দেবীপক্ষ</span>
+    <span class="brand-sub">DEVI PAKSHA</span>
+  </div>
   <div class="topbar-right">
-    <button class="icon-btn" id="fsBtn" title="Fullscreen">⛶</button>
+    <button class="toggle-btn" id="dayNightBtn" type="button" aria-label="Toggle Day and Night mode">
+      <span id="dayNightIcon">☀️</span><span id="dayNightLabel">Day</span>
+    </button>
+    <button class="icon-btn" id="fsBtn" title="Fullscreen" aria-label="Toggle Fullscreen">⛶</button>
   </div>
 </div>
 
@@ -1414,13 +1451,6 @@
 <!-- ── Day Selector ── -->
 <div class="day-selector" id="daySelector"></div>
 
-<!-- ── Controls Row ── -->
-<div class="controls-row">
-  <button class="toggle-btn" id="dayNightBtn" type="button">
-    <span id="dayNightIcon">☀️</span><span id="dayNightLabel">Day</span>
-  </button>
-</div>
-
 <!-- ── Mood Heading ── -->
 <div class="mood-heading-row">
   <h1 id="dayTitle">মহালয়া</h1>
@@ -1428,17 +1458,17 @@
   <div class="mood-copy" id="moodCopy">sacred, nostalgic, early-morning radio</div>
 </div>
 
-<!-- ── Fact banner (Did You Know) ── -->
-<div class="fact-banner" id="factBanner" title="Click to see another fact">
-  <div class="fb-head">
-    <div class="fb-title">Did You Know</div>
-    <div class="fb-dots" id="fbDots"></div>
-  </div>
-  <div class="fb-text" id="fbText"></div>
-</div>
-
 <!-- ── Main ── -->
 <main>
+
+  <!-- ── Fact banner (Did You Know) ── -->
+  <div class="fact-banner" id="factBanner" title="Click to see another fact">
+    <div class="fb-head">
+      <div class="fb-title">💡 Did You Know</div>
+      <div class="fb-dots" id="fbDots"></div>
+    </div>
+    <div class="fb-text" id="fbText"></div>
+  </div>
 
   <!-- ── Devipaksha-Style Pills Row ── -->
   <div class="dp-pills-row">

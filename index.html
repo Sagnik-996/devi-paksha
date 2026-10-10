@@ -32,14 +32,22 @@
     --red-sindoor: #c0392b;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; }
+  html, body {
+    height: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    -webkit-text-size-adjust: 100%;
+  }
   body {
     font-family: 'Inter', 'Noto Sans Bengali', sans-serif;
     background: var(--ink);
     color: var(--cream);
     min-height: 100vh;
+    min-height: 100dvh;
     overflow-x: hidden;
     position: relative;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   button { font-family: inherit; cursor: pointer; }
   a { color: inherit; text-decoration: none; }
@@ -189,6 +197,7 @@
     position: relative; z-index: 6;
     display: flex; gap: 8px; padding: 8px 16px 10px;
     overflow-x: auto; scrollbar-width: thin; -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity; scroll-padding: 0 16px; scroll-behavior: smooth;
   }
   .day-selector::-webkit-scrollbar { height: 4px; }
   .day-selector::-webkit-scrollbar-thumb { background: rgba(232,182,75,.3); border-radius: 999px; }
@@ -198,6 +207,7 @@
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
     backdrop-filter: blur(8px); transition: background .22s, border-color .22s, transform .12s, box-shadow .22s;
     opacity: .78; -webkit-tap-highlight-color: transparent; user-select: none;
+    scroll-snap-align: center;
   }
   .day-pill .bn { font-family: 'Noto Sans Bengali', sans-serif; font-weight: 600; font-size: 13px; }
   .day-pill .en { font-size: 9px; letter-spacing: .5px; text-transform: uppercase; opacity: .7; }
@@ -248,9 +258,10 @@
   /* ── Main content ── */
   main {
     position: relative; z-index: 5; max-width: 680px;
-    margin: clamp(120px, 24vh, 260px) auto 0;
-    padding: 0 16px calc(10px + env(safe-area-inset-bottom));
+    margin: clamp(60px, 16vh, 200px) auto 0;
+    padding: 0 16px calc(12px + env(safe-area-inset-bottom));
     display: flex; flex-direction: column; gap: 8px;
+    width: 100%;
   }
 
   /* ── Fact banner (Did You Know) ── */
@@ -331,11 +342,15 @@
   }
 
   @media (max-width: 899px) {
+    main {
+      margin: 12px auto 0;
+      max-width: 580px;
+    }
     .fact-banner {
       position: relative;
-      margin: 12px auto 4px;
+      margin: 10px auto 4px;
       width: calc(100% - 32px);
-      max-width: 480px;
+      max-width: 520px;
       min-height: unset;
       aspect-ratio: auto;
     }
@@ -528,7 +543,7 @@
     margin-top: 6px;
   }
   .dp-progress-bar {
-    height: 12px;
+    height: 18px;
     display: flex;
     align-items: center;
     cursor: pointer;
@@ -641,18 +656,6 @@
   .dp-mob-btn.active {
     color: #f1d449;
     background: rgba(241, 212, 73, 0.14);
-  }
-  @media (max-width: 580px) {
-    .dp-controls #dpShuffleBtn,
-    .dp-controls #dpRepeatBtn {
-      display: none;
-    }
-    .dp-mobile-toolbar {
-      display: grid;
-    }
-    .dp-player-card {
-      padding: 12px 14px;
-    }
   }
 
   /* YouTube Host Container (devipaksha.in 1x1 audio element - no ads, instant play) */
@@ -920,12 +923,444 @@
   .np-play-btn:active, .npbar-art-slot:active { transform: scale(.96); transition: transform .07s ease; }
   .transport-main:active { transform: scale(.92); }
 
-  @media (max-width: 520px) {
-    main { padding-left: 12px; padding-right: 12px; }
-    .np-expanded-sheet-inner { max-width: none; }
-    .np-expanded-sheet { padding-left: 10px; padding-right: 10px; }
-    .now-playing-bar { padding-left: 10px; padding-right: 10px; }
-    .mini-track .a { max-width: 78px; }
+  /* ═══════════════════════════════════════════════════════
+     RESPONSIVE DESIGN BREAKPOINTS
+     ═══════════════════════════════════════════════════════ */
+
+  /* ── Tablets & Intermediate Screens (<= 768px) ── */
+  @media (max-width: 768px) {
+    .photo-credit {
+      bottom: 70px;
+      right: 14px;
+      font-size: 11px;
+      padding: 5px 12px;
+      max-width: 85vw;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .dp-modal-dialog {
+      max-width: 90vw;
+      height: 84vh;
+    }
+  }
+
+  /* ── Mobile Phones (<= 600px) ── */
+  @media (max-width: 600px) {
+    .topbar {
+      padding: 10px 14px;
+      gap: 8px;
+    }
+    .icon-btn {
+      width: 32px;
+      height: 32px;
+      font-size: 13px;
+    }
+    .countdown-strip {
+      padding: 4px 12px 0;
+      gap: 6px;
+      font-size: 10.5px;
+    }
+    .cd-unit {
+      padding: 2.5px 6px;
+      border-radius: 6px;
+      font-size: 10.5px;
+    }
+    .cd-unit span {
+      font-size: 8px;
+    }
+    .day-selector {
+      padding: 6px 12px 8px;
+      gap: 6px;
+      scroll-padding: 0 12px;
+    }
+    .day-pill {
+      padding: 7px 13px;
+      min-height: 36px;
+      font-size: 11.5px;
+    }
+    .day-pill .bn { font-size: 12px; }
+    .day-pill .en { font-size: 8px; }
+    .day-pill .dt { font-size: 8px; }
+    .controls-row {
+      padding: 0 12px 6px;
+      gap: 7px;
+    }
+    .toggle-btn {
+      padding: 7px 14px;
+      min-height: 36px;
+      font-size: 11.5px;
+    }
+    .mood-heading-row {
+      margin: 4px auto 2px;
+      padding: 0 12px;
+    }
+    .mood-heading-row h1 {
+      font-size: clamp(1.7rem, 6.5vw, 2.4rem);
+    }
+    .mood-tagline {
+      font-size: clamp(0.92rem, 3vw, 1.12rem);
+      margin-top: 2px;
+    }
+    .mood-copy {
+      font-size: 11px;
+      margin-top: 4px;
+      line-height: 1.45;
+      padding: 0 6px;
+    }
+    .fact-banner {
+      margin: 8px auto 4px;
+      width: calc(100% - 24px);
+      padding: 9px 12px 10px;
+      border-radius: 14px;
+    }
+    .fb-title {
+      font-size: 8.5px;
+      letter-spacing: 1.2px;
+    }
+    .fb-text {
+      font-size: 11px;
+      line-height: 1.45;
+    }
+    main {
+      padding: 0 12px calc(14px + env(safe-area-inset-bottom));
+      margin: 10px auto 0;
+    }
+    .dp-pills-row {
+      margin-bottom: 8px;
+      gap: 8px;
+    }
+    .dp-pill-btn, .dp-dhak-btn {
+      padding: 6px 13px;
+      font-size: 10.5px;
+    }
+    .dp-player-card {
+      padding: 12px 14px;
+      border-radius: 20px;
+      margin-bottom: 10px;
+    }
+    .dp-card-main {
+      gap: 11px;
+    }
+    .dp-art-wrap {
+      width: 58px;
+      height: 58px;
+      border-radius: 12px;
+    }
+    .dp-track-title {
+      font-size: 13px;
+    }
+    .dp-track-artist {
+      font-size: 10.5px;
+    }
+    .dp-time-row {
+      font-size: 9px;
+    }
+    .dp-controls {
+      gap: 3px;
+    }
+    .dp-controls #dpShuffleBtn,
+    .dp-controls #dpRepeatBtn {
+      display: none;
+    }
+    .dp-ctrl-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+    }
+    .dp-play-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 11px;
+    }
+    .dp-play-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+    .dp-mobile-toolbar {
+      display: grid;
+      margin-top: 8px;
+      padding-top: 7px;
+    }
+    .dp-mob-btn {
+      font-size: 10.5px;
+      padding: 5px 4px;
+      gap: 5px;
+    }
+
+    /* Modal bottom sheet on mobile */
+    .dp-playlist-modal-backdrop {
+      padding: 0;
+      align-items: flex-end;
+    }
+    .dp-modal-dialog {
+      width: 100%;
+      max-width: 100%;
+      height: 86vh;
+      max-height: 88vh;
+      border-radius: 22px 22px 0 0;
+      border-bottom: none;
+      border-left: none;
+      border-right: none;
+      transform: translateY(100%);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .dp-modal-dialog::before {
+      content: '';
+      display: block;
+      width: 36px;
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.28);
+      margin: 8px auto 0;
+      flex-shrink: 0;
+    }
+    .dp-playlist-modal-backdrop.open .dp-modal-dialog {
+      transform: translateY(0);
+    }
+    .dp-modal-header {
+      padding: 10px 16px 12px;
+    }
+    .dp-modal-title {
+      font-size: 16px;
+    }
+    .dp-modal-sub {
+      font-size: 10px;
+    }
+    .dp-modal-close-btn {
+      width: 30px;
+      height: 30px;
+      font-size: 13px;
+    }
+    .dp-modal-search-wrap {
+      padding: 8px 14px;
+    }
+    .dp-modal-search-input {
+      font-size: 12.5px;
+    }
+    .dp-modal-tracklist-scroll {
+      padding: 8px 10px calc(16px + env(safe-area-inset-bottom));
+      gap: 3px;
+    }
+    .dp-track-row {
+      padding: 7px 10px;
+      gap: 9px;
+      border-radius: 10px;
+    }
+    .dp-row-num {
+      width: 18px;
+      font-size: 10px;
+    }
+    .dp-row-thumb {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+    }
+    .dp-row-title {
+      font-size: 12.5px;
+    }
+    .dp-row-artist {
+      font-size: 10.5px;
+    }
+    .dp-row-dur {
+      font-size: 10px;
+    }
+  }
+
+  /* ── Compact Phones (<= 400px) ── */
+  @media (max-width: 400px) {
+    .topbar {
+      padding: 8px 10px;
+    }
+    .day-selector {
+      padding: 5px 8px 6px;
+      gap: 5px;
+      scroll-padding: 0 8px;
+    }
+    .day-pill {
+      padding: 6px 11px;
+      min-height: 34px;
+    }
+    .mood-heading-row h1 {
+      font-size: 1.6rem;
+    }
+    .mood-tagline {
+      font-size: 0.88rem;
+    }
+    main {
+      padding: 0 10px calc(12px + env(safe-area-inset-bottom));
+      margin: 8px auto 0;
+    }
+    .dp-player-card {
+      padding: 10px 11px;
+      border-radius: 18px;
+      margin-bottom: 8px;
+    }
+    .dp-card-main {
+      gap: 9px;
+    }
+    .dp-art-wrap {
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+    }
+    .dp-track-title {
+      font-size: 12px;
+    }
+    .dp-track-artist {
+      font-size: 10px;
+    }
+    .dp-controls {
+      gap: 2px;
+    }
+    .dp-ctrl-btn {
+      width: 28px;
+      height: 28px;
+    }
+    .dp-ctrl-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+    .dp-play-btn {
+      width: 33px;
+      height: 33px;
+      border-radius: 9px;
+    }
+    .dp-play-btn svg {
+      width: 15px;
+      height: 15px;
+    }
+    .dp-mobile-toolbar {
+      margin-top: 6px;
+      padding-top: 5px;
+    }
+    .dp-mob-btn {
+      font-size: 10px;
+      padding: 4px 2px;
+    }
+    .dp-track-row {
+      padding: 6px 8px;
+      gap: 8px;
+    }
+    .dp-row-thumb {
+      width: 34px;
+      height: 34px;
+      border-radius: 7px;
+    }
+    .dp-row-num {
+      width: 16px;
+      font-size: 9.5px;
+    }
+    .dp-row-title {
+      font-size: 12px;
+    }
+    .dp-row-artist {
+      font-size: 10px;
+    }
+  }
+
+  /* ── Ultra-Compact Phones (<= 340px) ── */
+  @media (max-width: 340px) {
+    .day-pill {
+      padding: 5px 9px;
+      min-height: 32px;
+    }
+    .day-pill .bn { font-size: 11px; }
+    .day-pill .en { font-size: 7.5px; }
+    .dp-art-wrap {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+    }
+    .dp-card-main {
+      gap: 7px;
+    }
+    .dp-track-title {
+      font-size: 11.5px;
+    }
+    .dp-ctrl-btn {
+      width: 25px;
+      height: 25px;
+    }
+    .dp-ctrl-btn svg {
+      width: 13px;
+      height: 13px;
+    }
+    .dp-play-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+    }
+    .dp-row-thumb {
+      width: 30px;
+      height: 30px;
+    }
+  }
+
+  /* ── Landscape / Short Viewports (<= 520px height) ── */
+  @media (max-height: 520px) {
+    .topbar {
+      padding: 5px 14px;
+    }
+    .countdown-strip {
+      padding: 2px 14px 0;
+      font-size: 9.5px;
+    }
+    .day-selector {
+      padding: 3px 14px 5px;
+    }
+    .day-pill {
+      padding: 4px 10px;
+      min-height: 30px;
+    }
+    .controls-row {
+      padding: 0 14px 4px;
+    }
+    .toggle-btn {
+      padding: 4px 12px;
+      min-height: 28px;
+      font-size: 11px;
+    }
+    .mood-heading-row {
+      margin: 2px auto 1px;
+    }
+    .mood-heading-row h1 {
+      font-size: 1.45rem;
+    }
+    .mood-tagline {
+      font-size: 0.85rem;
+    }
+    .mood-copy {
+      display: none;
+    }
+    .fact-banner {
+      margin: 4px auto 2px;
+      padding: 6px 12px;
+    }
+    main {
+      margin: 4px auto 0;
+      gap: 4px;
+    }
+    .dp-pills-row {
+      margin-bottom: 4px;
+      gap: 6px;
+    }
+    .dp-pill-btn, .dp-dhak-btn {
+      padding: 4px 10px;
+      font-size: 9.5px;
+    }
+    .dp-player-card {
+      padding: 8px 12px;
+      margin-bottom: 6px;
+    }
+    .dp-art-wrap {
+      width: 44px;
+      height: 44px;
+    }
+    .dp-modal-dialog {
+      height: 94vh;
+      max-height: 96vh;
+    }
   }
 </style>
 </head>
@@ -2795,9 +3230,9 @@ function wireButtons() {
 
   const bar = document.getElementById("dpProgressBar");
   if (bar) {
-    bar.addEventListener("click", (e) => {
+    const handleSeek = (clientX) => {
       const rect = bar.getBoundingClientRect();
-      const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      const pos = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
       if (activeEngine === 'native' && nativeAudio) {
         const dur = nativeAudio.duration || 0;
         if (dur > 0) {
@@ -2813,7 +3248,15 @@ function wireButtons() {
           if (fill) fill.style.width = (pos * 100) + "%";
         }
       }
+    };
+    bar.addEventListener("click", (e) => {
+      handleSeek(e.clientX);
     });
+    bar.addEventListener("touchstart", (e) => {
+      if (e.touches && e.touches.length > 0) {
+        handleSeek(e.touches[0].clientX);
+      }
+    }, { passive: true });
   }
 }
 
